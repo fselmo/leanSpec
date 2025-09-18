@@ -24,7 +24,7 @@ def sample_blocks() -> Dict[Bytes32, Block]:
         slot=Slot(0),
         proposer_index=Uint64(0),
         parent_root=Bytes32.zero(),
-        state_root=Bytes32(b"genesis" + b"\x00" * 25),
+        state_root=Bytes32(data=b"genesis" + b"\x00" * 25),
         body=BlockBody(attestations=[]),
     )
     genesis_hash = hash_tree_root(genesis)
@@ -33,7 +33,7 @@ def sample_blocks() -> Dict[Bytes32, Block]:
         slot=Slot(1),
         proposer_index=Uint64(1),
         parent_root=genesis_hash,
-        state_root=Bytes32(b"block_a" + b"\x00" * 25),
+        state_root=Bytes32(data=b"block_a" + b"\x00" * 25),
         body=BlockBody(attestations=[]),
     )
     block_a_hash = hash_tree_root(block_a)
@@ -42,7 +42,7 @@ def sample_blocks() -> Dict[Bytes32, Block]:
         slot=Slot(2),
         proposer_index=Uint64(2),
         parent_root=block_a_hash,
-        state_root=Bytes32(b"block_b" + b"\x00" * 25),
+        state_root=Bytes32(data=b"block_b" + b"\x00" * 25),
         body=BlockBody(attestations=[]),
     )
     block_b_hash = hash_tree_root(block_b)
@@ -94,7 +94,7 @@ class TestLMDGHOSTAlgorithm:
             slot=Slot(0),
             proposer_index=Uint64(0),
             parent_root=Bytes32.zero(),
-            state_root=Bytes32(b"genesis" + b"\x00" * 25),
+            state_root=Bytes32(data=b"genesis" + b"\x00" * 25),
             body=BlockBody(attestations=[]),
         )
         genesis_hash = hash_tree_root(genesis)
@@ -104,7 +104,7 @@ class TestLMDGHOSTAlgorithm:
             slot=Slot(1),
             proposer_index=Uint64(1),
             parent_root=genesis_hash,
-            state_root=Bytes32(b"block_a" + b"\x00" * 25),
+            state_root=Bytes32(data=b"block_a" + b"\x00" * 25),
             body=BlockBody(attestations=[]),
         )
         block_a_hash = hash_tree_root(block_a)
@@ -113,7 +113,7 @@ class TestLMDGHOSTAlgorithm:
             slot=Slot(2),
             proposer_index=Uint64(2),
             parent_root=block_a_hash,
-            state_root=Bytes32(b"block_b" + b"\x00" * 25),
+            state_root=Bytes32(data=b"block_b" + b"\x00" * 25),
             body=BlockBody(attestations=[]),
         )
         block_b_hash = hash_tree_root(block_b)
@@ -123,7 +123,7 @@ class TestLMDGHOSTAlgorithm:
             slot=Slot(1),
             proposer_index=Uint64(3),
             parent_root=genesis_hash,
-            state_root=Bytes32(b"block_c" + b"\x00" * 25),
+            state_root=Bytes32(data=b"block_c" + b"\x00" * 25),
             body=BlockBody(attestations=[]),
         )
         block_c_hash = hash_tree_root(block_c)
@@ -132,7 +132,7 @@ class TestLMDGHOSTAlgorithm:
             slot=Slot(2),
             proposer_index=Uint64(4),
             parent_root=block_c_hash,
-            state_root=Bytes32(b"block_d" + b"\x00" * 25),
+            state_root=Bytes32(data=b"block_d" + b"\x00" * 25),
             body=BlockBody(attestations=[]),
         )
         block_d_hash = hash_tree_root(block_d)
@@ -172,7 +172,7 @@ class TestLMDGHOSTAlgorithm:
             slot=Slot(0),
             proposer_index=Uint64(0),
             parent_root=Bytes32.zero(),
-            state_root=Bytes32(b"genesis" + b"\x00" * 25),
+            state_root=Bytes32(data=b"genesis" + b"\x00" * 25),
             body=BlockBody(attestations=[]),
         )
         genesis_hash = hash_tree_root(genesis)
@@ -181,7 +181,7 @@ class TestLMDGHOSTAlgorithm:
             slot=Slot(1),
             proposer_index=Uint64(1),
             parent_root=genesis_hash,
-            state_root=Bytes32(b"block_a" + b"\x00" * 25),
+            state_root=Bytes32(data=b"block_a" + b"\x00" * 25),
             body=BlockBody(attestations=[]),
         )
         block_a_hash = hash_tree_root(block_a)
@@ -190,7 +190,7 @@ class TestLMDGHOSTAlgorithm:
             slot=Slot(1),
             proposer_index=Uint64(2),
             parent_root=genesis_hash,
-            state_root=Bytes32(b"block_b" + b"\x00" * 25),
+            state_root=Bytes32(data=b"block_b" + b"\x00" * 25),
             body=BlockBody(attestations=[]),
         )
         block_b_hash = hash_tree_root(block_b)
@@ -223,7 +223,7 @@ class TestLMDGHOSTAlgorithm:
             slot=Slot(0),
             proposer_index=Uint64(0),
             parent_root=Bytes32.zero(),
-            state_root=Bytes32(b"genesis" + b"\x00" * 25),
+            state_root=Bytes32(data=b"genesis" + b"\x00" * 25),
             body=BlockBody(attestations=[]),
         )
         genesis_hash = hash_tree_root(genesis)
@@ -233,7 +233,7 @@ class TestLMDGHOSTAlgorithm:
             slot=Slot(1),
             proposer_index=Uint64(1),
             parent_root=genesis_hash,
-            state_root=Bytes32(b"block_a" + b"\x00" * 25),
+            state_root=Bytes32(data=b"block_a" + b"\x00" * 25),
             body=BlockBody(attestations=[]),
         )
         block_a_hash = hash_tree_root(block_a)
@@ -242,7 +242,7 @@ class TestLMDGHOSTAlgorithm:
             slot=Slot(1),
             proposer_index=Uint64(2),
             parent_root=genesis_hash,
-            state_root=Bytes32(b"block_b" + b"\x00" * 25),
+            state_root=Bytes32(data=b"block_b" + b"\x00" * 25),
             body=BlockBody(attestations=[]),
         )
         block_b_hash = hash_tree_root(block_b)
@@ -275,7 +275,7 @@ class TestLMDGHOSTAlgorithm:
                 slot=Slot(i),
                 proposer_index=Uint64(i),
                 parent_root=prev_hash,
-                state_root=Bytes32(f"block{i}".encode() + b"\x00" * (32 - len(f"block{i}"))),
+                state_root=Bytes32(data=f"block{i}".encode() + b"\x00" * (32 - len(f"block{i}"))),
                 body=BlockBody(attestations=[]),
             )
             block_hash = hash_tree_root(block)
@@ -303,7 +303,7 @@ class TestLMDGHOSTAlgorithm:
             slot=Slot(0),
             proposer_index=Uint64(0),
             parent_root=Bytes32.zero(),
-            state_root=Bytes32(b"genesis" + b"\x00" * 25),
+            state_root=Bytes32(data=b"genesis" + b"\x00" * 25),
             body=BlockBody(attestations=[]),
         )
         genesis_hash = hash_tree_root(genesis)
@@ -312,7 +312,7 @@ class TestLMDGHOSTAlgorithm:
             slot=Slot(1),
             proposer_index=Uint64(1),
             parent_root=genesis_hash,
-            state_root=Bytes32(b"block_a" + b"\x00" * 25),
+            state_root=Bytes32(data=b"block_a" + b"\x00" * 25),
             body=BlockBody(attestations=[]),
         )
         block_a_hash = hash_tree_root(block_a)
@@ -321,7 +321,7 @@ class TestLMDGHOSTAlgorithm:
             slot=Slot(2),
             proposer_index=Uint64(2),
             parent_root=block_a_hash,
-            state_root=Bytes32(b"block_b" + b"\x00" * 25),
+            state_root=Bytes32(data=b"block_b" + b"\x00" * 25),
             body=BlockBody(attestations=[]),
         )
         block_b_hash = hash_tree_root(block_b)
@@ -330,7 +330,7 @@ class TestLMDGHOSTAlgorithm:
             slot=Slot(3),
             proposer_index=Uint64(3),
             parent_root=block_b_hash,
-            state_root=Bytes32(b"block_c" + b"\x00" * 25),
+            state_root=Bytes32(data=b"block_c" + b"\x00" * 25),
             body=BlockBody(attestations=[]),
         )
         block_c_hash = hash_tree_root(block_c)
@@ -363,7 +363,7 @@ class TestLMDGHOSTAlgorithm:
             slot=Slot(0),
             proposer_index=Uint64(0),
             parent_root=Bytes32.zero(),
-            state_root=Bytes32(b"genesis" + b"\x00" * 25),
+            state_root=Bytes32(data=b"genesis" + b"\x00" * 25),
             body=BlockBody(attestations=[]),
         )
         genesis_hash = hash_tree_root(genesis)
@@ -372,7 +372,7 @@ class TestLMDGHOSTAlgorithm:
             slot=Slot(1),
             proposer_index=Uint64(1),
             parent_root=genesis_hash,
-            state_root=Bytes32(b"block_a" + b"\x00" * 25),
+            state_root=Bytes32(data=b"block_a" + b"\x00" * 25),
             body=BlockBody(attestations=[]),
         )
         block_a_hash = hash_tree_root(block_a)
@@ -410,7 +410,7 @@ class TestStoreBasedForkChoice:
             slot=Slot(0),
             proposer_index=Uint64(0),
             parent_root=Bytes32.zero(),
-            state_root=Bytes32(b"genesis" + b"\x00" * 25),
+            state_root=Bytes32(data=b"genesis" + b"\x00" * 25),
             body=BlockBody(attestations=[]),
         )
         genesis_hash = hash_tree_root(genesis_block)

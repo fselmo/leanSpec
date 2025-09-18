@@ -152,8 +152,8 @@ def test_bytes_dunder_and_concat_and_rconcat() -> None:
 
 
 def test_hashlib_accepts_bytes32_via_add() -> None:
-    r1 = Bytes32(b"\x01" + b"\x00" * 31)
-    r2 = Bytes32(b"\x02" + b"\x00" * 31)
+    r1 = Bytes32(data=b"\x01" + b"\x00" * 31)
+    r2 = Bytes32(data=b"\x02" + b"\x00" * 31)
     # a + b -> bytes, usable by hashlib.sha256
     h = hashlib.sha256(r1 + r2).digest()
     assert isinstance(h, bytes)
@@ -291,9 +291,9 @@ def test_pydantic_bytelist_limit_enforced() -> None:
 
 
 def test_add_repr_equality_hash_do_not_crash_on_aliases() -> None:
-    a = Bytes32(b"\xaa" * 32)
-    b = Bytes32("aa" * 32)
-    c = Bytes32(bytearray(b"\xaa" * 32))
+    a = Bytes32(data=b"\xaa" * 32)
+    b = Bytes32(data="aa" * 32)
+    c = Bytes32(data=bytearray(b"\xaa" * 32))
     assert a == b == c
     assert hash(a) == hash(b) == hash(c)
     assert repr(a).startswith("Bytes32(")
@@ -303,9 +303,9 @@ def test_add_repr_equality_hash_do_not_crash_on_aliases() -> None:
 
 
 def test_sorted_bytes32_list_is_lexicographic_on_bytes() -> None:
-    a = Bytes32(b"\x00" * 31 + b"\x01")
-    b = Bytes32(b"\x00" * 31 + b"\x02")
-    c = Bytes32(b"\xff" * 32)
+    a = Bytes32(data=b"\x00" * 31 + b"\x01")
+    b = Bytes32(data=b"\x00" * 31 + b"\x02")
+    c = Bytes32(data=b"\xff" * 32)
     arr = [c, b, a]
     s = sorted(arr)
     assert s == [a, b, c]
@@ -314,7 +314,7 @@ def test_sorted_bytes32_list_is_lexicographic_on_bytes() -> None:
 def test_json_like_dump_of_vectors_lists() -> None:
     # Ensure users can dump simple object structures to JSON by pre-encoding to hex.
     obj = {
-        "root": Bytes32(b"\x11" * 32).hex(),
+        "root": Bytes32(data=b"\x11" * 32).hex(),
         "sig": Bytes96(bytes(range(96))).hex(),
         "payload": ByteList.__class_getitem__(5)(b"\x00\x01\x02\x03\x04").hex(),
     }

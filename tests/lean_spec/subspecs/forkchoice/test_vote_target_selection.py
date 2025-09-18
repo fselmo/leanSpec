@@ -30,7 +30,7 @@ class TestVoteTargetCalculation:
             slot=Slot(0),
             proposer_index=Uint64(0),
             parent_root=Bytes32.zero(),
-            state_root=Bytes32(b"genesis" + b"\x00" * 25),
+            state_root=Bytes32(data=b"genesis" + b"\x00" * 25),
             body=BlockBody(attestations=[]),
         )
         genesis_hash = hash_tree_root(genesis)
@@ -39,7 +39,7 @@ class TestVoteTargetCalculation:
             slot=Slot(1),
             proposer_index=Uint64(1),
             parent_root=genesis_hash,
-            state_root=Bytes32(b"block1" + b"\x00" * 26),
+            state_root=Bytes32(data=b"block1" + b"\x00" * 26),
             body=BlockBody(attestations=[]),
         )
         block_1_hash = hash_tree_root(block_1)
@@ -76,13 +76,13 @@ class TestVoteTargetCalculation:
         blocks = {}
 
         # Create 10 blocks
-        prev_hash = Bytes32(b"pre-genesis" + b"\x00" * 21)
+        prev_hash = Bytes32(data=b"pre-genesis" + b"\x00" * 21)
         for i in range(10):
             block = Block(
                 slot=Slot(i),
                 proposer_index=Uint64(i),
                 parent_root=prev_hash,
-                state_root=Bytes32(f"block{i}".encode() + b"\x00" * (32 - len(f"block{i}"))),
+                state_root=Bytes32(data=f"block{i}".encode() + b"\x00" * (32 - len(f"block{i}"))),
                 body=BlockBody(attestations=[]),
             )
             block_hash = hash_tree_root(block)
@@ -123,7 +123,7 @@ class TestVoteTargetCalculation:
             slot=Slot(0),
             proposer_index=Uint64(0),
             parent_root=Bytes32.zero(),
-            state_root=Bytes32(b"genesis" + b"\x00" * 25),
+            state_root=Bytes32(data=b"genesis" + b"\x00" * 25),
             body=BlockBody(attestations=[]),
         )
         genesis_hash = hash_tree_root(genesis)
@@ -132,7 +132,7 @@ class TestVoteTargetCalculation:
             slot=Slot(1),
             proposer_index=Uint64(1),
             parent_root=genesis_hash,
-            state_root=Bytes32(b"block1" + b"\x00" * 26),
+            state_root=Bytes32(data=b"block1" + b"\x00" * 26),
             body=BlockBody(attestations=[]),
         )
         block_1_hash = hash_tree_root(block_1)
@@ -141,7 +141,7 @@ class TestVoteTargetCalculation:
             slot=Slot(2),
             proposer_index=Uint64(2),
             parent_root=block_1_hash,
-            state_root=Bytes32(b"block2" + b"\x00" * 26),
+            state_root=Bytes32(data=b"block2" + b"\x00" * 26),
             body=BlockBody(attestations=[]),
         )
         block_2_hash = hash_tree_root(block_2)
@@ -184,7 +184,7 @@ class TestVoteTargetCalculation:
                 slot=Slot(i),
                 proposer_index=Uint64(i % 10),
                 parent_root=prev_hash,
-                state_root=Bytes32(f"block{i}".encode() + b"\x00" * (32 - len(f"block{i}"))),
+                state_root=Bytes32(data=f"block{i}".encode() + b"\x00" * (32 - len(f"block{i}"))),
                 body=BlockBody(attestations=[]),
             )
             block_hash = hash_tree_root(block)
@@ -230,7 +230,7 @@ class TestVoteTargetCalculation:
             slot=Slot(0),
             proposer_index=Uint64(0),
             parent_root=Bytes32.zero(),
-            state_root=Bytes32(b"genesis" + b"\x00" * 25),
+            state_root=Bytes32(data=b"genesis" + b"\x00" * 25),
             body=BlockBody(attestations=[]),
         )
         genesis_hash = hash_tree_root(genesis)
@@ -239,7 +239,7 @@ class TestVoteTargetCalculation:
             slot=Slot(5),
             proposer_index=Uint64(5),
             parent_root=genesis_hash,
-            state_root=Bytes32(b"head" + b"\x00" * 28),
+            state_root=Bytes32(data=b"head" + b"\x00" * 28),
             body=BlockBody(attestations=[]),
         )
         head_hash = hash_tree_root(head_block)
@@ -280,7 +280,7 @@ class TestSafeTargetComputation:
             slot=Slot(0),
             proposer_index=Uint64(0),
             parent_root=Bytes32.zero(),
-            state_root=Bytes32(b"genesis" + b"\x00" * 25),
+            state_root=Bytes32(data=b"genesis" + b"\x00" * 25),
             body=BlockBody(attestations=[]),
         )
         genesis_block_hash = hash_tree_root(genesis_block)
@@ -311,7 +311,7 @@ class TestSafeTargetComputation:
             slot=Slot(0),
             proposer_index=Uint64(0),
             parent_root=Bytes32.zero(),
-            state_root=Bytes32(b"genesis" + b"\x00" * 25),
+            state_root=Bytes32(data=b"genesis" + b"\x00" * 25),
             body=BlockBody(attestations=[]),
         )
         genesis_hash = hash_tree_root(genesis)
@@ -320,7 +320,7 @@ class TestSafeTargetComputation:
             slot=Slot(1),
             proposer_index=Uint64(1),
             parent_root=genesis_hash,
-            state_root=Bytes32(b"block1" + b"\x00" * 26),
+            state_root=Bytes32(data=b"block1" + b"\x00" * 26),
             body=BlockBody(attestations=[]),
         )
         block_1_hash = hash_tree_root(block_1)
@@ -386,7 +386,7 @@ class TestEdgeCases:
             slot=Slot(0),
             proposer_index=Uint64(0),
             parent_root=Bytes32.zero(),
-            state_root=Bytes32(b"genesis" + b"\x00" * 25),
+            state_root=Bytes32(data=b"genesis" + b"\x00" * 25),
             body=BlockBody(attestations=[]),
         )
         genesis_hash = hash_tree_root(genesis)

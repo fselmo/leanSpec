@@ -47,7 +47,7 @@ class Packer:
         if len(b) % BYTES_PER_CHUNK != 0:
             raise ValueError("partition requires a multiple of BYTES_PER_CHUNK")
         # Slice in steps of 32 to build Bytes32 chunks.
-        return [Bytes32(b[i : i + BYTES_PER_CHUNK]) for i in range(0, len(b), BYTES_PER_CHUNK)]
+        return [Bytes32(data=b[i : i + BYTES_PER_CHUNK]) for i in range(0, len(b), BYTES_PER_CHUNK)]
 
     @staticmethod
     def pack_basic_serialized(serialized_basic_values: Iterable[bytes]) -> List[Bytes32]:

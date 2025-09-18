@@ -32,12 +32,12 @@ def sample_state(config: Config) -> State:
         slot=Slot(0),
         proposer_index=ValidatorIndex(0),
         parent_root=Bytes32.zero(),
-        state_root=Bytes32(b"state" + b"\x00" * 27),
-        body_root=Bytes32(b"body" + b"\x00" * 28),
+        state_root=Bytes32(data=b"state" + b"\x00" * 27),
+        body_root=Bytes32(data=b"body" + b"\x00" * 28),
     )
 
     # Use a placeholder for genesis - will be updated in store fixture
-    temp_finalized = Checkpoint(root=Bytes32(b"genesis" + b"\x00" * 25), slot=Slot(0))
+    temp_finalized = Checkpoint(root=Bytes32(data=b"genesis" + b"\x00" * 25), slot=Slot(0))
 
     return State(
         config=config,
@@ -488,14 +488,14 @@ class TestValidatorErrorHandling:
     def test_produce_block_missing_parent_state(self) -> None:
         """Test error when parent state is missing."""
         config = Config(genesis_time=Uint64(1000), num_validators=Uint64(5))
-        checkpoint = Checkpoint(root=Bytes32(b"missing" + b"\x00" * 25), slot=Slot(0))
+        checkpoint = Checkpoint(root=Bytes32(data=b"missing" + b"\x00" * 25), slot=Slot(0))
 
         # Create store with missing parent state
         store = Store(
             time=Uint64(100),
             config=config,
-            head=Bytes32(b"nonexistent" + b"\x00" * 21),
-            safe_target=Bytes32(b"nonexistent" + b"\x00" * 21),
+            head=Bytes32(data=b"nonexistent" + b"\x00" * 21),
+            safe_target=Bytes32(data=b"nonexistent" + b"\x00" * 21),
             latest_justified=checkpoint,
             latest_finalized=checkpoint,
             blocks={},  # No blocks

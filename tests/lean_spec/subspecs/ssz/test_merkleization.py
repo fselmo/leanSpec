@@ -16,7 +16,7 @@ def h(a: Bytes32, b: Bytes32) -> Bytes32:
 
 
 # Create some sample chunks for testing, c[i] = bytes32(i)
-c = [Bytes32(i.to_bytes(32, "little")) for i in range(16)]
+c = [Bytes32(data=i.to_bytes(32, "little")) for i in range(16)]
 
 # Pre-calculate zero-tree roots for assertions
 # Z[0] = ZERO_HASH, Z[1] = h(Z[0], Z[0]), Z[2] = h(Z[1], Z[1]), etc.
@@ -102,7 +102,7 @@ def test_mix_in_length() -> None:
     """Tests mixing a length into a root."""
     root = c[0]
     length = 12345
-    length_bytes = Bytes32(length.to_bytes(32, "little"))
+    length_bytes = Bytes32(data=length.to_bytes(32, "little"))
     expected = h(root, length_bytes)
     assert Merkle.mix_in_length(root, length) == expected
 
@@ -111,7 +111,7 @@ def test_mix_in_length_zero() -> None:
     """Tests mixing a length of 0."""
     root = c[0]
     length = 0
-    length_bytes = Bytes32(length.to_bytes(32, "little"))
+    length_bytes = Bytes32(data=length.to_bytes(32, "little"))
     expected = h(root, length_bytes)
     assert Merkle.mix_in_length(root, length) == expected
 
@@ -126,7 +126,7 @@ def test_mix_in_selector() -> None:
     """Tests mixing a selector into a root."""
     root = c[1]
     selector = 42
-    selector_bytes = Bytes32(selector.to_bytes(32, "little"))
+    selector_bytes = Bytes32(data=selector.to_bytes(32, "little"))
     expected = h(root, selector_bytes)
     assert Merkle.mix_in_selector(root, selector) == expected
 

@@ -21,7 +21,7 @@ def sample_blocks() -> Dict[Bytes32, Block]:
         slot=Slot(0),
         proposer_index=Uint64(0),
         parent_root=Bytes32.zero(),
-        state_root=Bytes32(b"genesis" + b"\x00" * 25),
+        state_root=Bytes32(data=b"genesis" + b"\x00" * 25),
         body=BlockBody(attestations=[]),
     )
     genesis_hash = hash_tree_root(genesis)
@@ -30,7 +30,7 @@ def sample_blocks() -> Dict[Bytes32, Block]:
         slot=Slot(1),
         proposer_index=Uint64(1),
         parent_root=genesis_hash,
-        state_root=Bytes32(b"block_a" + b"\x00" * 25),
+        state_root=Bytes32(data=b"block_a" + b"\x00" * 25),
         body=BlockBody(attestations=[]),
     )
     block_a_hash = hash_tree_root(block_a)
@@ -39,7 +39,7 @@ def sample_blocks() -> Dict[Bytes32, Block]:
         slot=Slot(2),
         proposer_index=Uint64(2),
         parent_root=block_a_hash,
-        state_root=Bytes32(b"block_b" + b"\x00" * 25),
+        state_root=Bytes32(data=b"block_b" + b"\x00" * 25),
         body=BlockBody(attestations=[]),
     )
     block_b_hash = hash_tree_root(block_b)
@@ -122,14 +122,14 @@ class TestLatestJustifiedFunction:
 
     def test_get_latest_justified_single_state(self) -> None:
         """Test get_latest_justified with a single state."""
-        checkpoint = Checkpoint(root=Bytes32(b"test" + b"\x00" * 28), slot=Slot(5))
+        checkpoint = Checkpoint(root=Bytes32(data=b"test" + b"\x00" * 28), slot=Slot(5))
 
         class MockState:
             def __init__(self, justified: Checkpoint):
                 self.latest_justified = justified
 
         states: Dict[Bytes32, State] = {
-            Bytes32(b"state1" + b"\x00" * 26): MockState(checkpoint),  # type: ignore
+            Bytes32(data=b"state1" + b"\x00" * 26): MockState(checkpoint),  # type: ignore
         }
 
         result = get_latest_justified(states)
@@ -137,9 +137,9 @@ class TestLatestJustifiedFunction:
 
     def test_get_latest_justified_multiple_states(self) -> None:
         """Test get_latest_justified with states having different justified slots."""
-        checkpoint1 = Checkpoint(root=Bytes32(b"test1" + b"\x00" * 27), slot=Slot(10))
+        checkpoint1 = Checkpoint(root=Bytes32(data=b"test1" + b"\x00" * 27), slot=Slot(10))
         checkpoint2 = Checkpoint(
-            root=Bytes32(b"test2" + b"\x00" * 27), slot=Slot(20)
+            root=Bytes32(data=b"test2" + b"\x00" * 27), slot=Slot(20)
         )  # Higher slot
 
         class MockState:
@@ -147,8 +147,8 @@ class TestLatestJustifiedFunction:
                 self.latest_justified = justified
 
         states: Dict[Bytes32, State] = {
-            Bytes32(b"state1" + b"\x00" * 26): MockState(checkpoint1),  # type: ignore
-            Bytes32(b"state2" + b"\x00" * 26): MockState(checkpoint2),  # type: ignore
+            Bytes32(data=b"state1" + b"\x00" * 26): MockState(checkpoint1),  # type: ignore
+            Bytes32(data=b"state2" + b"\x00" * 26): MockState(checkpoint2),  # type: ignore
         }
 
         result = get_latest_justified(states)
@@ -156,16 +156,16 @@ class TestLatestJustifiedFunction:
 
     def test_get_latest_justified_tie_breaking(self) -> None:
         """Test get_latest_justified when multiple states have same justified slot."""
-        checkpoint1 = Checkpoint(root=Bytes32(b"test1" + b"\x00" * 27), slot=Slot(10))
-        checkpoint2 = Checkpoint(root=Bytes32(b"test2" + b"\x00" * 27), slot=Slot(10))
+        checkpoint1 = Checkpoint(root=Bytes32(data=b"test1" + b"\x00" * 27), slot=Slot(10))
+        checkpoint2 = Checkpoint(root=Bytes32(data=b"test2" + b"\x00" * 27), slot=Slot(10))
 
         class MockState:
             def __init__(self, justified: Checkpoint):
                 self.latest_justified = justified
 
         states: Dict[Bytes32, State] = {
-            Bytes32(b"state1" + b"\x00" * 26): MockState(checkpoint1),  # type: ignore
-            Bytes32(b"state2" + b"\x00" * 26): MockState(checkpoint2),  # type: ignore
+            Bytes32(data=b"state1" + b"\x00" * 26): MockState(checkpoint1),  # type: ignore
+            Bytes32(data=b"state2" + b"\x00" * 26): MockState(checkpoint2),  # type: ignore
         }
 
         result = get_latest_justified(states)

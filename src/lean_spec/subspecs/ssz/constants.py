@@ -8,5 +8,5 @@ BYTES_PER_CHUNK: int = 32
 BITS_PER_BYTE: int = 8
 """Number of bits per byte."""
 
-ZERO_HASH: Bytes32 = Bytes32(b"\x00" * BYTES_PER_CHUNK)
+ZERO_HASH: Bytes32 = Bytes32(data=b"\x00" * BYTES_PER_CHUNK)
 """A zero hash, used for padding in Merkleization."""

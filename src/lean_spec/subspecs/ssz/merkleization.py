@@ -91,7 +91,7 @@ class Merkle:
             raise ValueError("length must be non-negative")
         # The "mix" is `hash(root + length_uint256_le)`.
         le = length.to_bytes(32, "little")
-        return hash_nodes(root, Bytes32(le))
+        return hash_nodes(root, Bytes32(data=le))
 
     @staticmethod
     def mix_in_selector(root: Bytes32, selector: int) -> Bytes32:
@@ -99,7 +99,7 @@ class Merkle:
         if selector < 0:
             raise ValueError("selector must be non-negative")
         le = selector.to_bytes(32, "little")
-        return hash_nodes(root, Bytes32(le))
+        return hash_nodes(root, Bytes32(data=le))
 
     @staticmethod
     def _zero_tree_root(width_pow2: int) -> Bytes32:

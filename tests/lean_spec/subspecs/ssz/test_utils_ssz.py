@@ -37,12 +37,12 @@ def test_hash_nodes() -> None:
     Tests that hash_nodes correctly computes the SHA-256 hash of two concatenated nodes.
     """
     # Define two known 32-byte nodes.
-    node_a = Bytes32((1).to_bytes(32, "little"))
-    node_b = Bytes32((2).to_bytes(32, "little"))
+    node_a = Bytes32(data=(1).to_bytes(32, "little"))
+    node_b = Bytes32(data=(2).to_bytes(32, "little"))
 
     # Manually compute the expected hash using the standard library.
     expected_digest = hashlib.sha256(node_a + node_b).digest()
-    expected_hash = Bytes32(expected_digest)
+    expected_hash = Bytes32(data=expected_digest)
 
     # Call the function and assert that the result matches the expected hash.
     assert hash_nodes(node_a, node_b) == expected_hash
@@ -53,12 +53,12 @@ def test_hash_nodes_with_zero() -> None:
     Tests hashing a node with a zero-hash node to ensure correctness.
     """
     # Define a node and a zero node.
-    node_a = Bytes32((42).to_bytes(32, "little"))
+    node_a = Bytes32(data=(42).to_bytes(32, "little"))
     zero_node = Bytes32.zero()
 
     # Manually compute the expected hash.
     expected_digest = hashlib.sha256(node_a + zero_node).digest()
-    expected_hash = Bytes32(expected_digest)
+    expected_hash = Bytes32(data=expected_digest)
 
     # Assert the function's output is correct.
     assert hash_nodes(node_a, zero_node) == expected_hash

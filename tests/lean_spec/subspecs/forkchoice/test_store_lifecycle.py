@@ -23,7 +23,7 @@ def sample_config() -> Config:
 @pytest.fixture
 def sample_checkpoint() -> Checkpoint:
     """Sample checkpoint for testing."""
-    return Checkpoint(root=Bytes32(b"test_root" + b"\x00" * 23), slot=Slot(0))
+    return Checkpoint(root=Bytes32(data=b"test_root" + b"\x00" * 23), slot=Slot(0))
 
 
 @pytest.fixture
@@ -32,8 +32,8 @@ def sample_store(sample_config: Config, sample_checkpoint: Checkpoint) -> Store:
     return Store(
         time=Uint64(100),
         config=sample_config,
-        head=Bytes32(b"head_root" + b"\x00" * 23),
-        safe_target=Bytes32(b"safe_root" + b"\x00" * 23),
+        head=Bytes32(data=b"head_root" + b"\x00" * 23),
+        safe_target=Bytes32(data=b"safe_root" + b"\x00" * 23),
         latest_justified=sample_checkpoint,
         latest_finalized=sample_checkpoint,
     )
@@ -46,22 +46,22 @@ class TestStoreCreation:
         """Test basic Store creation with required fields."""
         assert sample_store.time == Uint64(100)
         assert sample_store.config.num_validators == Uint64(100)
-        assert sample_store.head == Bytes32(b"head_root" + b"\x00" * 23)
-        assert sample_store.safe_target == Bytes32(b"safe_root" + b"\x00" * 23)
+        assert sample_store.head == Bytes32(data=b"head_root" + b"\x00" * 23)
+        assert sample_store.safe_target == Bytes32(data=b"safe_root" + b"\x00" * 23)
         assert isinstance(sample_store.latest_justified, Checkpoint)
         assert isinstance(sample_store.latest_finalized, Checkpoint)
 
     def test_store_initialization_with_data(self) -> None:
         """Test Store initialization with blocks and states."""
         config = Config(num_validators=Uint64(10), genesis_time=Uint64(2000))
-        checkpoint = Checkpoint(root=Bytes32(b"test" + b"\x00" * 28), slot=Slot(5))
+        checkpoint = Checkpoint(root=Bytes32(data=b"test" + b"\x00" * 28), slot=Slot(5))
 
         # Sample block
         block = Block(
             slot=Slot(1),
             proposer_index=Uint64(1),
             parent_root=Bytes32.zero(),
-            state_root=Bytes32(b"state" + b"\x00" * 27),
+            state_root=Bytes32(data=b"state" + b"\x00" * 27),
             body=BlockBody(attestations=[]),
         )
         block_hash = hash_tree_root(block)
@@ -93,7 +93,7 @@ class TestStoreCreation:
         from lean_spec.subspecs.containers import State
 
         config = Config(num_validators=Uint64(10), genesis_time=Uint64(1000))
-        checkpoint = Checkpoint(root=Bytes32(b"genesis" + b"\x00" * 25), slot=Slot(0))
+        checkpoint = Checkpoint(root=Bytes32(data=b"genesis" + b"\x00" * 25), slot=Slot(0))
 
         # Create block header for testing
         from lean_spec.subspecs.containers.block import BlockHeader
@@ -102,8 +102,8 @@ class TestStoreCreation:
             slot=Slot(0),
             proposer_index=Uint64(0),
             parent_root=Bytes32.zero(),
-            state_root=Bytes32(b"state" + b"\x00" * 27),
-            body_root=Bytes32(b"body" + b"\x00" * 28),
+            state_root=Bytes32(data=b"state" + b"\x00" * 27),
+            body_root=Bytes32(data=b"body" + b"\x00" * 28),
         )
 
         # Create a minimal state for testing
@@ -148,13 +148,13 @@ class TestStoreDefaultValues:
     def test_store_empty_collections_by_default(self) -> None:
         """Test that Store initializes empty collections by default."""
         config = Config(num_validators=Uint64(5), genesis_time=Uint64(500))
-        checkpoint = Checkpoint(root=Bytes32(b"test" + b"\x00" * 28), slot=Slot(0))
+        checkpoint = Checkpoint(root=Bytes32(data=b"test" + b"\x00" * 28), slot=Slot(0))
 
         store = Store(
             time=Uint64(50),
             config=config,
-            head=Bytes32(b"head" + b"\x00" * 28),
-            safe_target=Bytes32(b"safe" + b"\x00" * 28),
+            head=Bytes32(data=b"head" + b"\x00" * 28),
+            safe_target=Bytes32(data=b"safe" + b"\x00" * 28),
             latest_justified=checkpoint,
             latest_finalized=checkpoint,
         )
@@ -183,14 +183,14 @@ class TestStoreValidation:
     def test_store_validation_required_fields(self) -> None:
         """Test that Store validates required fields."""
         config = Config(num_validators=Uint64(5), genesis_time=Uint64(500))
-        checkpoint = Checkpoint(root=Bytes32(b"test" + b"\x00" * 28), slot=Slot(0))
+        checkpoint = Checkpoint(root=Bytes32(data=b"test" + b"\x00" * 28), slot=Slot(0))
 
         # Should create successfully with all required fields
         store = Store(
             time=Uint64(100),
             config=config,
-            head=Bytes32(b"head" + b"\x00" * 28),
-            safe_target=Bytes32(b"safe" + b"\x00" * 28),
+            head=Bytes32(data=b"head" + b"\x00" * 28),
+            safe_target=Bytes32(data=b"safe" + b"\x00" * 28),
             latest_justified=checkpoint,
             latest_finalized=checkpoint,
         )
@@ -205,15 +205,15 @@ class TestStoreValidation:
     def test_store_type_validation(self) -> None:
         """Test Store validates field types."""
         config = Config(num_validators=Uint64(5), genesis_time=Uint64(500))
-        checkpoint = Checkpoint(root=Bytes32(b"test" + b"\x00" * 28), slot=Slot(0))
+        checkpoint = Checkpoint(root=Bytes32(data=b"test" + b"\x00" * 28), slot=Slot(0))
 
         # Test with wrong type for time - should work due to Pydantic coercion
         # but verify it gets converted to the right type
         store = Store(
             time=100,  # int instead of Uint64
             config=config,
-            head=Bytes32(b"head" + b"\x00" * 28),
-            safe_target=Bytes32(b"safe" + b"\x00" * 28),
+            head=Bytes32(data=b"head" + b"\x00" * 28),
+            safe_target=Bytes32(data=b"safe" + b"\x00" * 28),
             latest_justified=checkpoint,
             latest_finalized=checkpoint,
         )
@@ -231,8 +231,8 @@ class TestStoreComparison:
         store1 = Store(
             time=Uint64(100),
             config=sample_config,
-            head=Bytes32(b"head" + b"\x00" * 28),
-            safe_target=Bytes32(b"safe" + b"\x00" * 28),
+            head=Bytes32(data=b"head" + b"\x00" * 28),
+            safe_target=Bytes32(data=b"safe" + b"\x00" * 28),
             latest_justified=sample_checkpoint,
             latest_finalized=sample_checkpoint,
         )
@@ -240,8 +240,8 @@ class TestStoreComparison:
         store2 = Store(
             time=Uint64(100),
             config=sample_config,
-            head=Bytes32(b"head" + b"\x00" * 28),
-            safe_target=Bytes32(b"safe" + b"\x00" * 28),
+            head=Bytes32(data=b"head" + b"\x00" * 28),
+            safe_target=Bytes32(data=b"safe" + b"\x00" * 28),
             latest_justified=sample_checkpoint,
             latest_finalized=sample_checkpoint,
         )
@@ -249,8 +249,8 @@ class TestStoreComparison:
         store3 = Store(
             time=Uint64(200),  # Different time
             config=sample_config,
-            head=Bytes32(b"head" + b"\x00" * 28),
-            safe_target=Bytes32(b"safe" + b"\x00" * 28),
+            head=Bytes32(data=b"head" + b"\x00" * 28),
+            safe_target=Bytes32(data=b"safe" + b"\x00" * 28),
             latest_justified=sample_checkpoint,
             latest_finalized=sample_checkpoint,
         )

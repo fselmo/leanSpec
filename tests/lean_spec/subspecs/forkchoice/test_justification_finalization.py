@@ -23,7 +23,7 @@ class TestJustificationLogic:
 
     def test_get_latest_justified_single_state(self) -> None:
         """Test get_latest_justified with a single state."""
-        checkpoint = Checkpoint(root=Bytes32(b"test" + b"\x00" * 28), slot=Slot(5))
+        checkpoint = Checkpoint(root=Bytes32(data=b"test" + b"\x00" * 28), slot=Slot(5))
 
         # Create mock state with minimal required fields
         class MockState:
@@ -32,7 +32,7 @@ class TestJustificationLogic:
 
         state = MockState(checkpoint)
         states: Dict[Bytes32, State] = {
-            Bytes32(b"state1" + b"\x00" * 26): state  # type: ignore
+            Bytes32(data=b"state1" + b"\x00" * 26): state  # type: ignore
         }
 
         result = get_latest_justified(states)
@@ -40,11 +40,11 @@ class TestJustificationLogic:
 
     def test_get_latest_justified_multiple_states(self) -> None:
         """Test get_latest_justified with multiple states."""
-        checkpoint1 = Checkpoint(root=Bytes32(b"test1" + b"\x00" * 27), slot=Slot(10))
+        checkpoint1 = Checkpoint(root=Bytes32(data=b"test1" + b"\x00" * 27), slot=Slot(10))
         checkpoint2 = Checkpoint(
-            root=Bytes32(b"test2" + b"\x00" * 27), slot=Slot(20)
+            root=Bytes32(data=b"test2" + b"\x00" * 27), slot=Slot(20)
         )  # Higher slot
-        checkpoint3 = Checkpoint(root=Bytes32(b"test3" + b"\x00" * 27), slot=Slot(15))
+        checkpoint3 = Checkpoint(root=Bytes32(data=b"test3" + b"\x00" * 27), slot=Slot(15))
 
         # Create mock states with minimal required fields
         class MockState:
@@ -52,9 +52,9 @@ class TestJustificationLogic:
                 self.latest_justified = justified
 
         states: Dict[Bytes32, State] = {
-            Bytes32(b"state1" + b"\x00" * 26): MockState(checkpoint1),  # type: ignore
-            Bytes32(b"state2" + b"\x00" * 26): MockState(checkpoint2),  # type: ignore
-            Bytes32(b"state3" + b"\x00" * 26): MockState(checkpoint3),  # type: ignore
+            Bytes32(data=b"state1" + b"\x00" * 26): MockState(checkpoint1),  # type: ignore
+            Bytes32(data=b"state2" + b"\x00" * 26): MockState(checkpoint2),  # type: ignore
+            Bytes32(data=b"state3" + b"\x00" * 26): MockState(checkpoint3),  # type: ignore
         }
 
         result = get_latest_justified(states)
@@ -63,16 +63,16 @@ class TestJustificationLogic:
     def test_get_latest_justified_tie_breaking(self) -> None:
         """Test get_latest_justified with tied slots."""
         # Two checkpoints with same slot
-        checkpoint1 = Checkpoint(root=Bytes32(b"test1" + b"\x00" * 27), slot=Slot(10))
-        checkpoint2 = Checkpoint(root=Bytes32(b"test2" + b"\x00" * 27), slot=Slot(10))
+        checkpoint1 = Checkpoint(root=Bytes32(data=b"test1" + b"\x00" * 27), slot=Slot(10))
+        checkpoint2 = Checkpoint(root=Bytes32(data=b"test2" + b"\x00" * 27), slot=Slot(10))
 
         class MockState:
             def __init__(self, justified: Checkpoint):
                 self.latest_justified = justified
 
         states: Dict[Bytes32, State] = {
-            Bytes32(b"state1" + b"\x00" * 26): MockState(checkpoint1),  # type: ignore
-            Bytes32(b"state2" + b"\x00" * 26): MockState(checkpoint2),  # type: ignore
+            Bytes32(data=b"state1" + b"\x00" * 26): MockState(checkpoint1),  # type: ignore
+            Bytes32(data=b"state2" + b"\x00" * 26): MockState(checkpoint2),  # type: ignore
         }
 
         result = get_latest_justified(states)
@@ -82,14 +82,14 @@ class TestJustificationLogic:
 
     def test_get_latest_justified_zero_slot(self) -> None:
         """Test get_latest_justified with genesis (slot 0) checkpoints."""
-        genesis_checkpoint = Checkpoint(root=Bytes32(b"genesis" + b"\x00" * 25), slot=Slot(0))
+        genesis_checkpoint = Checkpoint(root=Bytes32(data=b"genesis" + b"\x00" * 25), slot=Slot(0))
 
         class MockState:
             def __init__(self, justified: Checkpoint):
                 self.latest_justified = justified
 
         states: Dict[Bytes32, State] = {
-            Bytes32(b"genesis_state" + b"\x00" * 19): MockState(genesis_checkpoint),  # type: ignore
+            Bytes32(data=b"genesis_state" + b"\x00" * 19): MockState(genesis_checkpoint),  # type: ignore
         }
 
         result = get_latest_justified(states)
@@ -98,18 +98,18 @@ class TestJustificationLogic:
 
     def test_get_latest_justified_large_slots(self) -> None:
         """Test get_latest_justified with large slot numbers."""
-        checkpoint1 = Checkpoint(root=Bytes32(b"test1" + b"\x00" * 27), slot=Slot(1000))
-        checkpoint2 = Checkpoint(root=Bytes32(b"test2" + b"\x00" * 27), slot=Slot(999))
-        checkpoint3 = Checkpoint(root=Bytes32(b"test3" + b"\x00" * 27), slot=Slot(1001))  # Highest
+        checkpoint1 = Checkpoint(root=Bytes32(data=b"test1" + b"\x00" * 27), slot=Slot(1000))
+        checkpoint2 = Checkpoint(root=Bytes32(data=b"test2" + b"\x00" * 27), slot=Slot(999))
+        checkpoint3 = Checkpoint(root=Bytes32(data=b"test3" + b"\x00" * 27), slot=Slot(1001))  # Highest
 
         class MockState:
             def __init__(self, justified: Checkpoint):
                 self.latest_justified = justified
 
         states: Dict[Bytes32, State] = {
-            Bytes32(b"state1" + b"\x00" * 26): MockState(checkpoint1),  # type: ignore
-            Bytes32(b"state2" + b"\x00" * 26): MockState(checkpoint2),  # type: ignore
-            Bytes32(b"state3" + b"\x00" * 26): MockState(checkpoint3),  # type: ignore
+            Bytes32(data=b"state1" + b"\x00" * 26): MockState(checkpoint1),  # type: ignore
+            Bytes32(data=b"state2" + b"\x00" * 26): MockState(checkpoint2),  # type: ignore
+            Bytes32(data=b"state3" + b"\x00" * 26): MockState(checkpoint3),  # type: ignore
         }
 
         result = get_latest_justified(states)
@@ -126,9 +126,9 @@ class TestFinalizationLogic:
         # and involves state transitions
 
         # Create checkpoints representing finalization progression
-        genesis = Checkpoint(root=Bytes32(b"genesis" + b"\x00" * 25), slot=Slot(0))
-        epoch_1 = Checkpoint(root=Bytes32(b"epoch1" + b"\x00" * 26), slot=Slot(32))
-        epoch_2 = Checkpoint(root=Bytes32(b"epoch2" + b"\x00" * 26), slot=Slot(64))
+        genesis = Checkpoint(root=Bytes32(data=b"genesis" + b"\x00" * 25), slot=Slot(0))
+        epoch_1 = Checkpoint(root=Bytes32(data=b"epoch1" + b"\x00" * 26), slot=Slot(32))
+        epoch_2 = Checkpoint(root=Bytes32(data=b"epoch2" + b"\x00" * 26), slot=Slot(64))
 
         # Test progression: genesis -> epoch_1 -> epoch_2
         assert genesis.slot < epoch_1.slot < epoch_2.slot
@@ -145,8 +145,8 @@ class TestFinalizationLogic:
         # 2. Supermajority support
         # 3. Proper epoch boundaries
 
-        justified = Checkpoint(root=Bytes32(b"justified" + b"\x00" * 23), slot=Slot(32))
-        finalized = Checkpoint(root=Bytes32(b"finalized" + b"\x00" * 23), slot=Slot(0))
+        justified = Checkpoint(root=Bytes32(data=b"justified" + b"\x00" * 23), slot=Slot(32))
+        finalized = Checkpoint(root=Bytes32(data=b"finalized" + b"\x00" * 23), slot=Slot(0))
 
         # Finalized should be earlier than or equal to justified
         assert finalized.slot <= justified.slot
@@ -160,10 +160,10 @@ class TestFinalizationLogic:
     def test_checkpoint_ordering(self) -> None:
         """Test checkpoint ordering for finalization logic."""
         checkpoints = [
-            Checkpoint(root=Bytes32(b"cp3" + b"\x00" * 29), slot=Slot(96)),
-            Checkpoint(root=Bytes32(b"cp1" + b"\x00" * 29), slot=Slot(32)),
-            Checkpoint(root=Bytes32(b"cp2" + b"\x00" * 29), slot=Slot(64)),
-            Checkpoint(root=Bytes32(b"cp0" + b"\x00" * 29), slot=Slot(0)),
+            Checkpoint(root=Bytes32(data=b"cp3" + b"\x00" * 29), slot=Slot(96)),
+            Checkpoint(root=Bytes32(data=b"cp1" + b"\x00" * 29), slot=Slot(32)),
+            Checkpoint(root=Bytes32(data=b"cp2" + b"\x00" * 29), slot=Slot(64)),
+            Checkpoint(root=Bytes32(data=b"cp0" + b"\x00" * 29), slot=Slot(0)),
         ]
 
         # Sort by slot for finalization order
@@ -176,7 +176,7 @@ class TestFinalizationLogic:
 
     def test_checkpoint_equality(self) -> None:
         """Test checkpoint equality for finalization comparisons."""
-        root = Bytes32(b"same_root" + b"\x00" * 23)
+        root = Bytes32(data=b"same_root" + b"\x00" * 23)
         slot = Slot(42)
 
         cp1 = Checkpoint(root=root, slot=slot)
@@ -194,7 +194,7 @@ class TestCheckpointValidation:
 
     def test_checkpoint_creation(self) -> None:
         """Test checkpoint creation and validation."""
-        root = Bytes32(b"test_root" + b"\x00" * 23)
+        root = Bytes32(data=b"test_root" + b"\x00" * 23)
         slot = Slot(42)
 
         checkpoint = Checkpoint(root=root, slot=slot)
@@ -207,13 +207,13 @@ class TestCheckpointValidation:
     def test_checkpoint_root_validation(self) -> None:
         """Test checkpoint root field validation."""
         # Test with valid 32-byte root
-        valid_root = Bytes32(b"a" * 32)
+        valid_root = Bytes32(data=b"a" * 32)
         checkpoint = Checkpoint(root=valid_root, slot=Slot(0))
         assert len(checkpoint.root) == 32
 
     def test_checkpoint_slot_validation(self) -> None:
         """Test checkpoint slot field validation."""
-        root = Bytes32(b"test" + b"\x00" * 28)
+        root = Bytes32(data=b"test" + b"\x00" * 28)
 
         # Test various slot values
         checkpoint_0 = Checkpoint(root=root, slot=Slot(0))

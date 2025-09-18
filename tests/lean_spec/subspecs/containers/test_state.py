@@ -220,7 +220,7 @@ def test_get_justifications_single_root(base_state: State) -> None:
     - Expect the map to pair that root with the exact slice.
     """
     # Create a unique root under consideration.
-    root1 = Bytes32(b"\x01" * 32)
+    root1 = Bytes32(data=b"\x01" * 32)
 
     # Prepare a vote bitlist with required length; flip two positions to True.
     votes1 = [Boolean(False)] * DEVNET_CONFIG.validator_registry_limit.as_int()
@@ -254,9 +254,9 @@ def test_get_justifications_multiple_roots(base_state: State) -> None:
     - Expect the map to split and assign slices to matching roots.
     """
     # Three distinct roots to track.
-    root1 = Bytes32(b"\x01" * 32)
-    root2 = Bytes32(b"\x02" * 32)
-    root3 = Bytes32(b"\x03" * 32)
+    root1 = Bytes32(data=b"\x01" * 32)
+    root2 = Bytes32(data=b"\x02" * 32)
+    root3 = Bytes32(data=b"\x03" * 32)
 
     # Validator registry limit length for each vote slice.
     limit = DEVNET_CONFIG.validator_registry_limit.as_int()
@@ -313,7 +313,7 @@ def test_with_justifications_empty(
         latest_finalized=sample_checkpoint,
         historical_block_hashes=[],
         justified_slots=[],
-        justifications_roots=[Bytes32(b"\x01" * 32)],
+        justifications_roots=[Bytes32(data=b"\x01" * 32)],
         justifications_validators=[True] * DEVNET_CONFIG.validator_registry_limit.as_int(),
     )
 
@@ -340,8 +340,8 @@ def test_with_justifications_deterministic_order(base_state: State) -> None:
     - Expect flattened votes to follow the sorted order.
     """
     # Two roots to test ordering.
-    root1 = Bytes32(b"\x01" * 32)
-    root2 = Bytes32(b"\x02" * 32)
+    root1 = Bytes32(data=b"\x01" * 32)
+    root2 = Bytes32(data=b"\x02" * 32)
 
     # Build two vote slices of proper length.
     limit = DEVNET_CONFIG.validator_registry_limit.as_int()
@@ -372,7 +372,7 @@ def test_with_justifications_invalid_length(base_state: State) -> None:
     - Call with_justifications and expect an assertion.
     """
     # Single root key for the map.
-    root1 = Bytes32(b"\x01" * 32)
+    root1 = Bytes32(data=b"\x01" * 32)
 
     # Construct an invalid votes bitlist: one short of required length.
     invalid_votes = [Boolean(True)] * (DEVNET_CONFIG.validator_registry_limit - Uint64(1)).as_int()
@@ -387,27 +387,27 @@ def test_with_justifications_invalid_length(base_state: State) -> None:
     "justifications_map",
     [
         pytest.param({}, id="empty_justifications"),
-        pytest.param({Bytes32(b"\x01" * 32): _create_votes([0])}, id="single_root"),
+        pytest.param({Bytes32(data=b"\x01" * 32): _create_votes([0])}, id="single_root"),
         pytest.param(
             {
-                Bytes32(b"\x01" * 32): _create_votes([0]),
-                Bytes32(b"\x02" * 32): _create_votes([1, 2]),
+                Bytes32(data=b"\x01" * 32): _create_votes([0]),
+                Bytes32(data=b"\x02" * 32): _create_votes([1, 2]),
             },
             id="multiple_roots_sorted",
         ),
         pytest.param(
             {
-                Bytes32(b"\x02" * 32): _create_votes([1, 2]),
-                Bytes32(b"\x01" * 32): _create_votes([0]),
+                Bytes32(data=b"\x02" * 32): _create_votes([1, 2]),
+                Bytes32(data=b"\x01" * 32): _create_votes([0]),
             },
             id="multiple_roots_unsorted",
         ),
         pytest.param(
             {
-                Bytes32(b"\x03" * 32): [Boolean(True)]
+                Bytes32(data=b"\x03" * 32): [Boolean(True)]
                 * DEVNET_CONFIG.validator_registry_limit.as_int(),
-                Bytes32(b"\x01" * 32): _create_votes([0]),
-                Bytes32(b"\x02" * 32): _create_votes([1, 2]),
+                Bytes32(data=b"\x01" * 32): _create_votes([0]),
+                Bytes32(data=b"\x02" * 32): _create_votes([1, 2]),
             },
             id="complex_unsorted",
         ),
@@ -558,7 +558,7 @@ def test_process_block_header_valid(genesis_state: State) -> None:
     [
         (2, 1, None, "Block slot mismatch"),
         (1, 2, None, "Incorrect block proposer"),
-        (1, 1, Bytes32(b"\xde" * 32), "Block parent root mismatch"),
+        (1, 1, Bytes32(data=b"\xde" * 32), "Block parent root mismatch"),
     ],
 )
 def test_process_block_header_invalid(

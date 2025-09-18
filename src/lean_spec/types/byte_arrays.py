@@ -11,11 +11,10 @@ from __future__ import annotations
 
 from typing import IO, Any, ClassVar, Iterable, Type
 
-from pydantic.annotated_handlers import GetCoreSchemaHandler
-from pydantic_core import CoreSchema, core_schema
+from pydantic import Field, field_validator
 from typing_extensions import Iterator, Self
 
-from .ssz_base import SSZType
+from .ssz_base import SSZModel, SSZType
 
 
 def _coerce_to_bytes(value: Any) -> bytes:
@@ -43,7 +42,7 @@ def _coerce_to_bytes(value: Any) -> bytes:
     return bytes(value)
 
 
-class ByteVectorBase(SSZType):
+class ByteVectorBase(SSZModel):
     """
     Base class for specialized `ByteVector[N]`.
 
@@ -55,22 +54,22 @@ class ByteVectorBase(SSZType):
 
     LENGTH: ClassVar[int]  # set by the specialization factory
 
-    def __init__(self, data: Any = b"") -> None:
-        """
-        Build a fixed-size byte vector.
+    data: bytes = Field(default=b"")
+    """The raw bytes stored in this vector."""
 
-        Args:
-            data: Any value coercible to bytes (see `_coerce_to_bytes`).
+    @field_validator("data", mode="before")
+    @classmethod
+    def _validate_byte_vector_data(cls, v: Any) -> bytes:
+        """Validate and convert input to bytes with exact length checking."""
+        if not hasattr(cls, "LENGTH"):
+            raise TypeError(f"{cls.__name__} must define LENGTH")
 
-        Raises:
-            ValueError: if the resulting byte length differs from `LENGTH`.
-        """
-        b = _coerce_to_bytes(data)
-        if len(b) != self.LENGTH:
+        b = _coerce_to_bytes(v)
+        if len(b) != cls.LENGTH:
             raise ValueError(
-                f"ByteVector[{self.LENGTH}] expects exactly {self.LENGTH} bytes, got {len(b)}"
+                f"ByteVector[{cls.LENGTH}] expects exactly {cls.LENGTH} bytes, got {len(b)}"
             )
-        self._b = b
+        return b
 
     @classmethod
     def zero(cls) -> Self:
@@ -80,12 +79,17 @@ class ByteVectorBase(SSZType):
         Returns:
             A new instance of this `ByteVector` class, zero-initialized.
         """
-        return cls(b"\x00" * cls.LENGTH)
+        return cls(data=b"\x00" * cls.LENGTH)
 
     @classmethod
     def is_fixed_size(cls) -> bool:
         """ByteVector is fixed-size (length known at the type level)."""
         return True
+
+    @classmethod
+    def get_byte_length(cls) -> int:
+        """Get the byte length of this fixed-size type."""
+        return cls.LENGTH
 
     def serialize(self, stream: IO[bytes]) -> int:
         """
@@ -94,8 +98,8 @@ class ByteVectorBase(SSZType):
         Returns:
             Number of bytes written (always `LENGTH`).
         """
-        stream.write(self._b)
-        return len(self._b)
+        stream.write(self.data)
+        return len(self.data)
 
     @classmethod
     def deserialize(cls, stream: IO[bytes], scope: int) -> Self:
@@ -115,11 +119,11 @@ class ByteVectorBase(SSZType):
         data = stream.read(scope)
         if len(data) != scope:
             raise IOError("Stream ended prematurely while decoding ByteVector")
-        return cls(data)
+        return cls(data=data)
 
     def encode_bytes(self) -> bytes:
         """Return the value's canonical SSZ byte representation."""
-        return self._b
+        return self.data
 
     @classmethod
     def decode_bytes(cls, data: bytes) -> Self:
@@ -132,87 +136,58 @@ class ByteVectorBase(SSZType):
             raise ValueError(
                 f"ByteVector[{cls.LENGTH}] expects exactly {cls.LENGTH} bytes, got {len(data)}"
             )
-        return cls(data)
+        return cls(data=data)
 
     def __len__(self) -> int:
         """Return the length of the byte vector."""
         return self.LENGTH
 
-    def __iter__(self) -> Iterator[int]:
+    def __iter__(self) -> Iterator[int]:  # type: ignore[override]
         """Return an iterator over the byte vector."""
-        return iter(self._b)
+        return iter(self.data)
 
     def __bytes__(self) -> bytes:
         """Return the byte vector as a bytes object."""
-        return self._b
+        return self.data
 
     def __add__(self, other: Any) -> bytes:
         """Return the concatenation of the byte vector and the argument."""
         if isinstance(other, (bytes, bytearray)):
-            return self._b + bytes(other)
-        return self._b + bytes(other)
+            return self.data + bytes(other)
+        return self.data + bytes(other)
 
     def __radd__(self, other: Any) -> bytes:
         """Return the concatenation of the argument and the byte vector."""
         if isinstance(other, (bytes, bytearray)):
-            return bytes(other) + self._b
-        return bytes(other) + self._b
+            return bytes(other) + self.data
+        return bytes(other) + self.data
 
     def __getitem__(self, i: int) -> int:
         """Return the i-th byte of the byte vector."""
-        return self._b[i]
+        return self.data[i]
 
     def __repr__(self) -> str:
         """Return a string representation of the byte vector."""
         tname = type(self).__name__
-        return f"{tname}({self._b.hex()})"
+        return f"{tname}({self.data.hex()})"
 
     def __eq__(self, other: object) -> bool:
         """Return whether the two byte vectors are equal."""
-        return isinstance(other, type(self)) and self._b == other._b
+        return isinstance(other, type(self)) and self.data == other.data
 
     def __hash__(self) -> int:
         """Return the hash of the byte vector."""
-        return hash((type(self), self._b))
+        return hash((type(self), self.data))
 
     def hex(self) -> str:
         """Return the hexadecimal string representation of the underlying bytes."""
-        return self._b.hex()
+        return self.data.hex()
 
     def __lt__(self, other: object) -> bool:
         """Return whether the byte vector is less than the other byte vector."""
         if not isinstance(other, type(self)):
             return NotImplemented
-        return self._b < other._b
-
-    @classmethod
-    def __get_pydantic_core_schema__(
-        cls, source_type: Any, handler: GetCoreSchemaHandler
-    ) -> CoreSchema:
-        """
-        Pydantic schema:
-
-        - Accept an instance of this specialized type (pass-through).
-        - Or accept any value coercible to bytes with the exact `LENGTH`.
-
-        Serialize to raw `bytes`.
-        """
-
-        def validator(v: Any) -> ByteVectorBase:
-            if isinstance(v, cls):
-                return v
-            return cls(v)
-
-        def serializer(x: ByteVectorBase) -> bytes:
-            return x.encode_bytes()
-
-        return core_schema.union_schema(
-            [
-                core_schema.is_instance_schema(cls),
-                core_schema.no_info_plain_validator_function(validator),
-            ],
-            serialization=core_schema.plain_serializer_function_ser_schema(serializer),
-        )
+        return self.data < other.data
 
 
 class ByteVector(SSZType):
@@ -288,7 +263,7 @@ class Bytes96(ByteVectorBase):
     LENGTH = 96
 
 
-class ByteListBase(SSZType):
+class ByteListBase(SSZModel):
     """
     Base class for specialized `ByteList[L]`.
 
@@ -301,20 +276,20 @@ class ByteListBase(SSZType):
     LIMIT: ClassVar[int]
     """Maximum number of bytes the instance may contain."""
 
-    def __init__(self, data: Any = b"") -> None:
-        """
-        Build a byte list, enforcing the limit.
+    data: bytes = Field(default=b"")
+    """The raw bytes stored in this list."""
 
-        Args:
-            data: Any value coercible to bytes (see `_coerce_to_bytes`).
+    @field_validator("data", mode="before")
+    @classmethod
+    def _validate_byte_list_data(cls, v: Any) -> bytes:
+        """Validate and convert input to bytes with limit checking."""
+        if not hasattr(cls, "LIMIT"):
+            raise TypeError(f"{cls.__name__} must define LIMIT")
 
-        Raises:
-            ValueError: if the resulting length exceeds `LIMIT`.
-        """
-        b = _coerce_to_bytes(data)
-        if len(b) > self.LIMIT:
-            raise ValueError(f"ByteList[{self.LIMIT}] length {len(b)} exceeds limit {self.LIMIT}")
-        self._b = b
+        b = _coerce_to_bytes(v)
+        if len(b) > cls.LIMIT:
+            raise ValueError(f"ByteList[{cls.LIMIT}] length {len(b)} exceeds limit {cls.LIMIT}")
+        return b
 
     @classmethod
     def is_fixed_size(cls) -> bool:
@@ -328,8 +303,8 @@ class ByteListBase(SSZType):
         Returns:
             Number of bytes written (the length of this instance).
         """
-        stream.write(self._b)
-        return len(self._b)
+        stream.write(self.data)
+        return len(self.data)
 
     @classmethod
     def deserialize(cls, stream: IO[bytes], scope: int) -> Self:
@@ -350,11 +325,11 @@ class ByteListBase(SSZType):
             raise IOError("Stream ended prematurely while decoding ByteList")
         if len(data) > cls.LIMIT:
             raise ValueError(f"ByteList[{cls.LIMIT}] decoded length {len(data)} exceeds limit")
-        return cls(data)
+        return cls(data=data)
 
     def encode_bytes(self) -> bytes:
         """Return the value's canonical SSZ byte representation."""
-        return self._b
+        return self.data
 
     @classmethod
     def decode_bytes(cls, data: bytes) -> Self:
@@ -365,81 +340,52 @@ class ByteListBase(SSZType):
         """
         if len(data) > cls.LIMIT:
             raise ValueError(f"ByteList[{cls.LIMIT}] length {len(data)} exceeds limit")
-        return cls(data)
+        return cls(data=data)
 
     def __len__(self) -> int:
         """Return the length of the byte list."""
-        return len(self._b)
+        return len(self.data)
 
-    def __iter__(self) -> Iterator[int]:
+    def __iter__(self) -> Iterator[int]:  # type: ignore[override]
         """Return an iterator over the byte list."""
-        return iter(self._b)
+        return iter(self.data)
 
     def __bytes__(self) -> bytes:
         """Return the byte list as a bytes object."""
-        return self._b
+        return self.data
 
     def __add__(self, other: Any) -> bytes:
         """Return the concatenation of the byte list and the argument."""
         if isinstance(other, (bytes, bytearray)):
-            return self._b + bytes(other)
-        return self._b + bytes(other)
+            return self.data + bytes(other)
+        return self.data + bytes(other)
 
     def __radd__(self, other: Any) -> bytes:
         """Return the concatenation of the argument and the byte list."""
         if isinstance(other, (bytes, bytearray)):
-            return bytes(other) + self._b
-        return bytes(other) + self._b
+            return bytes(other) + self.data
+        return bytes(other) + self.data
 
     def __getitem__(self, i: int) -> int:
         """Return the i-th byte of the byte list."""
-        return self._b[i]
+        return self.data[i]
 
     def __repr__(self) -> str:
         """Return a string representation of the byte list."""
         tname = type(self).__name__
-        return f"{tname}({self._b.hex()})"
+        return f"{tname}({self.data.hex()})"
 
     def __eq__(self, other: object) -> bool:
         """Return whether the two byte lists are equal."""
-        return isinstance(other, type(self)) and self._b == other._b
+        return isinstance(other, type(self)) and self.data == other.data
 
     def __hash__(self) -> int:
         """Return the hash of the byte list."""
-        return hash((type(self), self._b))
+        return hash((type(self), self.data))
 
     def hex(self) -> str:
         """Return the hexadecimal string representation of the underlying bytes."""
-        return self._b.hex()
-
-    @classmethod
-    def __get_pydantic_core_schema__(
-        cls, source_type: Any, handler: GetCoreSchemaHandler
-    ) -> CoreSchema:
-        """
-        Pydantic schema:
-
-        - Accept an instance of this specialized type (pass-through).
-        - Or accept any value coercible to bytes whose length is `<= LIMIT`.
-
-        Serialize to raw `bytes`.
-        """
-
-        def validator(v: Any) -> ByteListBase:
-            if isinstance(v, cls):
-                return v
-            return cls(v)
-
-        def serializer(x: ByteListBase) -> bytes:
-            return x.encode_bytes()
-
-        return core_schema.union_schema(
-            [
-                core_schema.is_instance_schema(cls),
-                core_schema.no_info_plain_validator_function(validator),
-            ],
-            serialization=core_schema.plain_serializer_function_ser_schema(serializer),
-        )
+        return self.data.hex()
 
 
 class ByteList(SSZType):

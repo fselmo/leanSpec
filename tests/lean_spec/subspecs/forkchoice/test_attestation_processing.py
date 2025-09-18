@@ -25,13 +25,13 @@ def sample_config() -> Config:
 @pytest.fixture
 def sample_store(sample_config: Config) -> Store:
     """Create a sample forkchoice store."""
-    checkpoint = Checkpoint(root=Bytes32(b"test_root" + b"\x00" * 23), slot=Slot(0))
+    checkpoint = Checkpoint(root=Bytes32(data=b"test_root" + b"\x00" * 23), slot=Slot(0))
 
     return Store(
         time=Uint64(100),
         config=sample_config,
-        head=Bytes32(b"head_root" + b"\x00" * 23),
-        safe_target=Bytes32(b"safe_root" + b"\x00" * 23),
+        head=Bytes32(data=b"head_root" + b"\x00" * 23),
+        safe_target=Bytes32(data=b"safe_root" + b"\x00" * 23),
         latest_justified=checkpoint,
         latest_finalized=checkpoint,
     )
@@ -47,7 +47,7 @@ class TestAttestationValidation:
             slot=Slot(1),
             proposer_index=Uint64(1),
             parent_root=Bytes32.zero(),
-            state_root=Bytes32(b"source" + b"\x00" * 26),
+            state_root=Bytes32(data=b"source" + b"\x00" * 26),
             body=BlockBody(attestations=[]),
         )
         source_hash = hash_tree_root(source_block)
@@ -56,7 +56,7 @@ class TestAttestationValidation:
             slot=Slot(2),
             proposer_index=Uint64(2),
             parent_root=source_hash,
-            state_root=Bytes32(b"target" + b"\x00" * 26),
+            state_root=Bytes32(data=b"target" + b"\x00" * 26),
             body=BlockBody(attestations=[]),
         )
         target_hash = hash_tree_root(target_block)
@@ -85,7 +85,7 @@ class TestAttestationValidation:
             slot=Slot(2),  # Later than target
             proposer_index=Uint64(1),
             parent_root=Bytes32.zero(),
-            state_root=Bytes32(b"source" + b"\x00" * 26),
+            state_root=Bytes32(data=b"source" + b"\x00" * 26),
             body=BlockBody(attestations=[]),
         )
         source_hash = hash_tree_root(source_block)
@@ -94,7 +94,7 @@ class TestAttestationValidation:
             slot=Slot(1),  # Earlier than source
             proposer_index=Uint64(2),
             parent_root=Bytes32.zero(),
-            state_root=Bytes32(b"target" + b"\x00" * 26),
+            state_root=Bytes32(data=b"target" + b"\x00" * 26),
             body=BlockBody(attestations=[]),
         )
         target_hash = hash_tree_root(target_block)
@@ -119,8 +119,8 @@ class TestAttestationValidation:
 
     def test_validate_attestation_missing_blocks(self, sample_store: Store) -> None:
         """Test validation fails when referenced blocks are missing."""
-        source_hash = Bytes32(b"missing_source" + b"\x00" * 18)
-        target_hash = Bytes32(b"missing_target" + b"\x00" * 18)
+        source_hash = Bytes32(data=b"missing_source" + b"\x00" * 18)
+        target_hash = Bytes32(data=b"missing_target" + b"\x00" * 18)
 
         # Create signed vote referencing missing blocks
         vote = Vote(
@@ -143,7 +143,7 @@ class TestAttestationValidation:
             slot=Slot(1),
             proposer_index=Uint64(1),
             parent_root=Bytes32.zero(),
-            state_root=Bytes32(b"source" + b"\x00" * 26),
+            state_root=Bytes32(data=b"source" + b"\x00" * 26),
             body=BlockBody(attestations=[]),
         )
         source_hash = hash_tree_root(source_block)
@@ -152,7 +152,7 @@ class TestAttestationValidation:
             slot=Slot(2),
             proposer_index=Uint64(2),
             parent_root=source_hash,
-            state_root=Bytes32(b"target" + b"\x00" * 26),
+            state_root=Bytes32(data=b"target" + b"\x00" * 26),
             body=BlockBody(attestations=[]),
         )
         target_hash = hash_tree_root(target_block)
@@ -182,7 +182,7 @@ class TestAttestationValidation:
             slot=Slot(1),
             proposer_index=Uint64(1),
             parent_root=Bytes32.zero(),
-            state_root=Bytes32(b"source" + b"\x00" * 26),
+            state_root=Bytes32(data=b"source" + b"\x00" * 26),
             body=BlockBody(attestations=[]),
         )
         source_hash = hash_tree_root(source_block)
@@ -191,7 +191,7 @@ class TestAttestationValidation:
             slot=Slot(1000),  # Very far in future
             proposer_index=Uint64(2),
             parent_root=source_hash,
-            state_root=Bytes32(b"target" + b"\x00" * 26),
+            state_root=Bytes32(data=b"target" + b"\x00" * 26),
             body=BlockBody(attestations=[]),
         )
         target_hash = hash_tree_root(target_block)
@@ -225,7 +225,7 @@ class TestAttestationProcessing:
             slot=Slot(1),
             proposer_index=Uint64(1),
             parent_root=Bytes32.zero(),
-            state_root=Bytes32(b"source" + b"\x00" * 26),
+            state_root=Bytes32(data=b"source" + b"\x00" * 26),
             body=BlockBody(attestations=[]),
         )
         source_hash = hash_tree_root(source_block)
@@ -234,7 +234,7 @@ class TestAttestationProcessing:
             slot=Slot(2),
             proposer_index=Uint64(2),
             parent_root=source_hash,
-            state_root=Bytes32(b"target" + b"\x00" * 26),
+            state_root=Bytes32(data=b"target" + b"\x00" * 26),
             body=BlockBody(attestations=[]),
         )
         target_hash = hash_tree_root(target_block)
@@ -267,7 +267,7 @@ class TestAttestationProcessing:
             slot=Slot(1),
             proposer_index=Uint64(1),
             parent_root=Bytes32.zero(),
-            state_root=Bytes32(b"source" + b"\x00" * 26),
+            state_root=Bytes32(data=b"source" + b"\x00" * 26),
             body=BlockBody(attestations=[]),
         )
         source_hash = hash_tree_root(source_block)
@@ -276,7 +276,7 @@ class TestAttestationProcessing:
             slot=Slot(2),
             proposer_index=Uint64(2),
             parent_root=source_hash,
-            state_root=Bytes32(b"target" + b"\x00" * 26),
+            state_root=Bytes32(data=b"target" + b"\x00" * 26),
             body=BlockBody(attestations=[]),
         )
         target_hash = hash_tree_root(target_block)
@@ -309,7 +309,7 @@ class TestAttestationProcessing:
             slot=Slot(1),
             proposer_index=Uint64(1),
             parent_root=Bytes32.zero(),
-            state_root=Bytes32(b"target1" + b"\x00" * 25),
+            state_root=Bytes32(data=b"target1" + b"\x00" * 25),
             body=BlockBody(attestations=[]),
         )
         target_hash_1 = hash_tree_root(target_block_1)
@@ -318,7 +318,7 @@ class TestAttestationProcessing:
             slot=Slot(2),
             proposer_index=Uint64(2),
             parent_root=target_hash_1,
-            state_root=Bytes32(b"target2" + b"\x00" * 25),
+            state_root=Bytes32(data=b"target2" + b"\x00" * 25),
             body=BlockBody(attestations=[]),
         )
         target_hash_2 = hash_tree_root(target_block_2)
@@ -362,7 +362,7 @@ class TestAttestationProcessing:
             slot=Slot(1),
             proposer_index=Uint64(1),
             parent_root=Bytes32.zero(),
-            state_root=Bytes32(b"source" + b"\x00" * 26),
+            state_root=Bytes32(data=b"source" + b"\x00" * 26),
             body=BlockBody(attestations=[]),
         )
         source_hash = hash_tree_root(source_block)
@@ -371,7 +371,7 @@ class TestAttestationProcessing:
             slot=Slot(2),
             proposer_index=Uint64(2),
             parent_root=source_hash,
-            state_root=Bytes32(b"target" + b"\x00" * 26),
+            state_root=Bytes32(data=b"target" + b"\x00" * 26),
             body=BlockBody(attestations=[]),
         )
         target_hash = hash_tree_root(target_block)
@@ -415,7 +415,7 @@ class TestBlockProcessing:
             slot=Slot(1),
             proposer_index=Uint64(1),
             parent_root=Bytes32.zero(),
-            state_root=Bytes32(b"parent" + b"\x00" * 26),
+            state_root=Bytes32(data=b"parent" + b"\x00" * 26),
             body=BlockBody(attestations=[]),
         )
         parent_hash = hash_tree_root(parent_block)

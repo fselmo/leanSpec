@@ -23,13 +23,13 @@ def sample_config() -> Config:
 @pytest.fixture
 def sample_store(sample_config: Config) -> Store:
     """Create a sample forkchoice store."""
-    checkpoint = Checkpoint(root=Bytes32(b"test_root" + b"\x00" * 23), slot=Slot(0))
+    checkpoint = Checkpoint(root=Bytes32(data=b"test_root" + b"\x00" * 23), slot=Slot(0))
 
     return Store(
         time=Uint64(100),
         config=sample_config,
-        head=Bytes32(b"head_root" + b"\x00" * 23),
-        safe_target=Bytes32(b"safe_root" + b"\x00" * 23),
+        head=Bytes32(data=b"head_root" + b"\x00" * 23),
+        safe_target=Bytes32(data=b"safe_root" + b"\x00" * 23),
         latest_justified=checkpoint,
         latest_finalized=checkpoint,
     )
@@ -122,7 +122,7 @@ class TestIntervalTicking:
         object.__setattr__(sample_store, "time", initial_time)
 
         # Add some test votes for processing
-        test_checkpoint = Checkpoint(root=Bytes32(b"test" + b"\x00" * 28), slot=Slot(1))
+        test_checkpoint = Checkpoint(root=Bytes32(data=b"test" + b"\x00" * 28), slot=Slot(1))
         sample_store.latest_new_votes[ValidatorIndex(0)] = test_checkpoint
 
         # Tick through a complete slot cycle
@@ -205,7 +205,7 @@ class TestVoteProcessingTiming:
     def test_accept_new_votes_basic(self, sample_store: Store) -> None:
         """Test basic new vote processing."""
         # Add some new votes
-        checkpoint = Checkpoint(root=Bytes32(b"test" + b"\x00" * 28), slot=Slot(1))
+        checkpoint = Checkpoint(root=Bytes32(data=b"test" + b"\x00" * 28), slot=Slot(1))
         sample_store.latest_new_votes[ValidatorIndex(0)] = checkpoint
 
         initial_new_votes = len(sample_store.latest_new_votes)
@@ -223,7 +223,7 @@ class TestVoteProcessingTiming:
         # Add multiple new votes
         checkpoints = [
             Checkpoint(
-                root=Bytes32(f"test{i}".encode() + b"\x00" * (32 - len(f"test{i}"))), slot=Slot(i)
+                root=Bytes32(data=f"test{i}".encode() + b"\x00" * (32 - len(f"test{i}"))), slot=Slot(i)
             )
             for i in range(5)
         ]
@@ -264,7 +264,7 @@ class TestProposalHeadTiming:
             slot=Slot(0),
             proposer_index=Uint64(0),
             parent_root=Bytes32.zero(),
-            state_root=Bytes32(b"genesis" + b"\x00" * 25),
+            state_root=Bytes32(data=b"genesis" + b"\x00" * 25),
             body=BlockBody(attestations=[]),
         )
         genesis_hash = hash_tree_root(genesis_block)
@@ -294,7 +294,7 @@ class TestProposalHeadTiming:
     def test_get_proposal_head_processes_votes(self, sample_store: Store) -> None:
         """Test that get_proposal_head processes pending votes."""
         # Add some new votes
-        checkpoint = Checkpoint(root=Bytes32(b"vote" + b"\x00" * 28), slot=Slot(1))
+        checkpoint = Checkpoint(root=Bytes32(data=b"vote" + b"\x00" * 28), slot=Slot(1))
         sample_store.latest_new_votes[ValidatorIndex(10)] = checkpoint
 
         # Get proposal head should process votes
