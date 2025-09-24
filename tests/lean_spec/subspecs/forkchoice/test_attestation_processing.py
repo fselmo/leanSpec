@@ -49,7 +49,7 @@ class TestAttestationValidation:
             proposer_index=Uint64(1),
             parent_root=Bytes32.zero(),
             state_root=Bytes32(b"source" + b"\x00" * 26),
-            body=BlockBody(attestations=Attestations(data=[])),
+            body=BlockBody(attestations=Attestations([])),
         )
         source_hash = hash_tree_root(source_block)
 
@@ -58,7 +58,7 @@ class TestAttestationValidation:
             proposer_index=Uint64(2),
             parent_root=source_hash,
             state_root=Bytes32(b"target" + b"\x00" * 26),
-            body=BlockBody(attestations=Attestations(data=[])),
+            body=BlockBody(attestations=Attestations([])),
         )
         target_hash = hash_tree_root(target_block)
 
@@ -87,7 +87,7 @@ class TestAttestationValidation:
             proposer_index=Uint64(1),
             parent_root=Bytes32.zero(),
             state_root=Bytes32(b"source" + b"\x00" * 26),
-            body=BlockBody(attestations=Attestations(data=[])),
+            body=BlockBody(attestations=Attestations([])),
         )
         source_hash = hash_tree_root(source_block)
 
@@ -96,7 +96,7 @@ class TestAttestationValidation:
             proposer_index=Uint64(2),
             parent_root=Bytes32.zero(),
             state_root=Bytes32(b"target" + b"\x00" * 26),
-            body=BlockBody(attestations=Attestations(data=[])),
+            body=BlockBody(attestations=Attestations([])),
         )
         target_hash = hash_tree_root(target_block)
 
@@ -145,7 +145,7 @@ class TestAttestationValidation:
             proposer_index=Uint64(1),
             parent_root=Bytes32.zero(),
             state_root=Bytes32(b"source" + b"\x00" * 26),
-            body=BlockBody(attestations=Attestations(data=[])),
+            body=BlockBody(attestations=Attestations([])),
         )
         source_hash = hash_tree_root(source_block)
 
@@ -154,7 +154,7 @@ class TestAttestationValidation:
             proposer_index=Uint64(2),
             parent_root=source_hash,
             state_root=Bytes32(b"target" + b"\x00" * 26),
-            body=BlockBody(attestations=Attestations(data=[])),
+            body=BlockBody(attestations=Attestations([])),
         )
         target_hash = hash_tree_root(target_block)
 
@@ -184,7 +184,7 @@ class TestAttestationValidation:
             proposer_index=Uint64(1),
             parent_root=Bytes32.zero(),
             state_root=Bytes32(b"source" + b"\x00" * 26),
-            body=BlockBody(attestations=Attestations(data=[])),
+            body=BlockBody(attestations=Attestations([])),
         )
         source_hash = hash_tree_root(source_block)
 
@@ -193,7 +193,7 @@ class TestAttestationValidation:
             proposer_index=Uint64(2),
             parent_root=source_hash,
             state_root=Bytes32(b"target" + b"\x00" * 26),
-            body=BlockBody(attestations=Attestations(data=[])),
+            body=BlockBody(attestations=Attestations([])),
         )
         target_hash = hash_tree_root(target_block)
 
@@ -227,7 +227,7 @@ class TestAttestationProcessing:
             proposer_index=Uint64(1),
             parent_root=Bytes32.zero(),
             state_root=Bytes32(b"source" + b"\x00" * 26),
-            body=BlockBody(attestations=Attestations(data=[])),
+            body=BlockBody(attestations=Attestations([])),
         )
         source_hash = hash_tree_root(source_block)
 
@@ -236,7 +236,7 @@ class TestAttestationProcessing:
             proposer_index=Uint64(2),
             parent_root=source_hash,
             state_root=Bytes32(b"target" + b"\x00" * 26),
-            body=BlockBody(attestations=Attestations(data=[])),
+            body=BlockBody(attestations=Attestations([])),
         )
         target_hash = hash_tree_root(target_block)
 
@@ -269,7 +269,7 @@ class TestAttestationProcessing:
             proposer_index=Uint64(1),
             parent_root=Bytes32.zero(),
             state_root=Bytes32(b"source" + b"\x00" * 26),
-            body=BlockBody(attestations=Attestations(data=[])),
+            body=BlockBody(attestations=Attestations([])),
         )
         source_hash = hash_tree_root(source_block)
 
@@ -278,7 +278,7 @@ class TestAttestationProcessing:
             proposer_index=Uint64(2),
             parent_root=source_hash,
             state_root=Bytes32(b"target" + b"\x00" * 26),
-            body=BlockBody(attestations=Attestations(data=[])),
+            body=BlockBody(attestations=Attestations([])),
         )
         target_hash = hash_tree_root(target_block)
 
@@ -311,7 +311,7 @@ class TestAttestationProcessing:
             proposer_index=Uint64(1),
             parent_root=Bytes32.zero(),
             state_root=Bytes32(b"target1" + b"\x00" * 25),
-            body=BlockBody(attestations=Attestations(data=[])),
+            body=BlockBody(attestations=Attestations([])),
         )
         target_hash_1 = hash_tree_root(target_block_1)
 
@@ -320,7 +320,7 @@ class TestAttestationProcessing:
             proposer_index=Uint64(2),
             parent_root=target_hash_1,
             state_root=Bytes32(b"target2" + b"\x00" * 25),
-            body=BlockBody(attestations=Attestations(data=[])),
+            body=BlockBody(attestations=Attestations([])),
         )
         target_hash_2 = hash_tree_root(target_block_2)
 
@@ -364,7 +364,7 @@ class TestAttestationProcessing:
             proposer_index=Uint64(1),
             parent_root=Bytes32.zero(),
             state_root=Bytes32(b"source" + b"\x00" * 26),
-            body=BlockBody(attestations=Attestations(data=[])),
+            body=BlockBody(attestations=Attestations([])),
         )
         source_hash = hash_tree_root(source_block)
 
@@ -373,7 +373,7 @@ class TestAttestationProcessing:
             proposer_index=Uint64(2),
             parent_root=source_hash,
             state_root=Bytes32(b"target" + b"\x00" * 26),
-            body=BlockBody(attestations=Attestations(data=[])),
+            body=BlockBody(attestations=Attestations([])),
         )
         target_hash = hash_tree_root(target_block)
 
@@ -417,7 +417,7 @@ class TestBlockProcessing:
             proposer_index=Uint64(1),
             parent_root=Bytes32.zero(),
             state_root=Bytes32(b"parent" + b"\x00" * 26),
-            body=BlockBody(attestations=Attestations(data=[])),
+            body=BlockBody(attestations=Attestations([])),
         )
         parent_hash = hash_tree_root(parent_block)
 

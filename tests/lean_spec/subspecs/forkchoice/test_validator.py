@@ -52,10 +52,10 @@ def sample_state(config: Config) -> State:
         latest_block_header=block_header,
         latest_justified=temp_finalized,
         latest_finalized=temp_finalized,
-        historical_block_hashes=HistoricalBlockHashes(data=[]),
-        justified_slots=JustifiedSlots(data=[]),
-        justifications_roots=JustificationRoots(data=[]),
-        justifications_validators=JustificationValidators(data=[]),
+        historical_block_hashes=HistoricalBlockHashes([]),
+        justified_slots=JustifiedSlots([]),
+        justifications_roots=JustificationRoots([]),
+        justifications_validators=JustificationValidators([]),
     )
 
 
@@ -68,7 +68,7 @@ def sample_store(config: Config, sample_state: State) -> Store:
         proposer_index=ValidatorIndex(0),
         parent_root=Bytes32.zero(),
         state_root=hash_tree_root(sample_state),
-        body=BlockBody(attestations=Attestations(data=[])),
+        body=BlockBody(attestations=Attestations([])),
     )
     genesis_hash = hash_tree_root(genesis_block)
 
@@ -407,7 +407,7 @@ class TestValidatorIntegration:
         config = Config(genesis_time=Uint64(1000), num_validators=Uint64(3))
 
         # Create minimal genesis block first
-        genesis_body = BlockBody(attestations=Attestations(data=[]))
+        genesis_body = BlockBody(attestations=Attestations([]))
 
         # Create minimal state with temporary header
         checkpoint = Checkpoint(root=Bytes32.zero(), slot=Slot(0))
@@ -423,10 +423,10 @@ class TestValidatorIntegration:
             ),
             latest_justified=checkpoint,
             latest_finalized=checkpoint,
-            historical_block_hashes=HistoricalBlockHashes(data=[]),
-            justified_slots=JustifiedSlots(data=[]),
-            justifications_roots=JustificationRoots(data=[]),
-            justifications_validators=JustificationValidators(data=[]),
+            historical_block_hashes=HistoricalBlockHashes([]),
+            justified_slots=JustifiedSlots([]),
+            justifications_roots=JustificationRoots([]),
+            justifications_validators=JustificationValidators([]),
         )
 
         # Compute consistent state root

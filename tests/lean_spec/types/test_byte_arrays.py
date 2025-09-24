@@ -9,7 +9,6 @@ from typing import Any, Type
 
 from lean_spec.types.byte_arrays import (
     ByteList64,
-    ByteList256,
     Bytes1,
     Bytes4,
     Bytes8,
@@ -39,7 +38,7 @@ def test_bytelist_inheritance_ok() -> None:
     # Test that our concrete ByteList types properly inherit from BaseByteList
     assert issubclass(ByteList64, BaseByteList)
     assert ByteList64.LIMIT == 64
-    v = ByteList64(data=b"\x01\x02")
+    v = ByteList64(b"\x01\x02")
     assert isinstance(v, ByteList64)
     assert len(v) == 2
 
@@ -82,7 +81,7 @@ def test_bytelist_coercion(value: Any, expected: bytes) -> None:
     class ByteList5(BaseByteList):
         LIMIT = 5
 
-    v = ByteList5(data=value)
+    v = ByteList5(value)
     assert bytes(v) == expected
     assert len(v) == len(expected)
 
@@ -90,7 +89,7 @@ def test_bytelist_coercion(value: Any, expected: bytes) -> None:
 def test_bytelist_over_limit_raises() -> None:
     # Test with ByteList64 that has limit 64
     with pytest.raises(ValueError):
-        ByteList64(data=b"\x00" * 65)  # Over the limit
+        ByteList64(b"\x00" * 65)  # Over the limit
 
 
 def test_is_fixed_size_flags() -> None:
@@ -187,7 +186,7 @@ def test_encode_decode_roundtrip_list(limit: int, data: bytes) -> None:
     class TestByteList(BaseByteList):
         LIMIT = limit
 
-    x = TestByteList(data=data)
+    x = TestByteList(data)
     assert x.encode_bytes() == data
     assert TestByteList.decode_bytes(data) == x
 
@@ -222,7 +221,6 @@ class ModelVectors(BaseModel):
     key: Bytes4
 
 
-# Create test ByteList16 for the ModelLists test
 class ByteList16(BaseByteList):
     LIMIT = 16
 
@@ -258,7 +256,7 @@ def test_pydantic_validates_vector_lengths() -> None:
 
 
 def test_pydantic_accepts_and_serializes_bytelist() -> None:
-    m = ModelLists(payload=ByteList16(data="0x000102030405060708090a0b0c0d0e0f"))
+    m = ModelLists(payload=ByteList16("0x000102030405060708090a0b0c0d0e0f"))
 
     assert isinstance(m.payload, ByteList16)
     assert m.payload.encode_bytes() == bytes(range(16))
@@ -266,10 +264,9 @@ def test_pydantic_accepts_and_serializes_bytelist() -> None:
     dumped = m.model_dump()
     payload = dumped["payload"]
 
-    # ByteList serializes as dict with 'data' field
-    assert isinstance(payload, dict)
-    assert "data" in payload
-    assert payload["data"] == bytes(range(16))
+    # Accept any bytes-like object
+    assert isinstance(payload, (bytes, bytearray, memoryview))
+    assert bytes(payload) == bytes(range(16))
 
     # Round-trip back through Pydantic using the dumped Python object
     decoded = ModelLists.model_validate(dumped)
@@ -311,7 +308,7 @@ def test_json_like_dump_of_vectors_lists() -> None:
     obj = {
         "root": Bytes32(b"\x11" * 32).hex(),
         "sig": Bytes96(bytes(range(96))).hex(),
-        "payload": ByteList5(data=b"\x00\x01\x02\x03\x04").hex(),
+        "payload": ByteList5(b"\x00\x01\x02\x03\x04").hex(),
     }
     # strings are JSON-serializable
     assert json.loads(json.dumps(obj)) == obj
@@ -321,8 +318,8 @@ def test_bytelist_hex_and_concat_behaviour_like_vector() -> None:
     class ByteList8(BaseByteList):
         LIMIT = 8
 
-    x = ByteList8(data="0x00010203")
-    y = ByteList8(data=[4, 5])
+    x = ByteList8("0x00010203")
+    y = ByteList8([4, 5])
     # __add__ returns bytes
     conc = x + y
     assert conc == b"\x00\x01\x02\x03\x04\x05"

@@ -24,16 +24,16 @@ from typing import (
     Tuple,
 )
 
-from pydantic import Field, field_validator
+from pydantic import field_validator
 from typing_extensions import Self
 
 from .boolean import Boolean
-from .ssz_base import SSZModel
+from .ssz_base import SSZRootModel
 
 
-class BaseBitvector(SSZModel):
+class BaseBitvector(SSZRootModel[Tuple[Boolean, ...]]):
     """
-    Base class for fixed-length bit vectors using SSZModel pattern.
+    Base class for fixed-length bit vectors using SSZRootModel pattern.
 
     Immutable collection with exact LENGTH bits.
     """
@@ -41,10 +41,7 @@ class BaseBitvector(SSZModel):
     LENGTH: ClassVar[int]
     """Number of bits in the vector."""
 
-    data: Tuple[Boolean, ...] = Field(default_factory=tuple)
-    """The immutable bit data stored as a tuple."""
-
-    @field_validator("data", mode="before")
+    @field_validator("root", mode="before")
     @classmethod
     def _validate_vector_data(cls, v: Any) -> Tuple[Boolean, ...]:
         """Validate and convert input data to typed tuple of Booleans."""
@@ -98,7 +95,7 @@ class BaseBitvector(SSZModel):
         """
         byte_len = (self.LENGTH + 7) // 8
         byte_array = bytearray(byte_len)
-        for i, bit in enumerate(self.data):
+        for i, bit in enumerate(self.root):
             if bit:
                 byte_array[i // 8] |= 1 << (i % 8)
         return bytes(byte_array)
@@ -115,10 +112,10 @@ class BaseBitvector(SSZModel):
             raise ValueError(f"{cls.__name__} expected {expected_len} bytes, got {len(data)}")
 
         bits = tuple(Boolean((data[i // 8] >> (i % 8)) & 1) for i in range(cls.LENGTH))
-        return cls(data=bits)
+        return cls(bits)
 
 
-class BaseBitlist(SSZModel):
+class BaseBitlist(SSZRootModel[Tuple[Boolean, ...]]):
     """
     Base class for variable-length bit lists using SSZModel pattern.
 
@@ -128,10 +125,7 @@ class BaseBitlist(SSZModel):
     LIMIT: ClassVar[int]
     """Maximum number of bits allowed."""
 
-    data: Tuple[Boolean, ...] = Field(default_factory=tuple)
-    """The immutable bit data stored as a tuple."""
-
-    @field_validator("data", mode="before")
+    @field_validator("root", mode="before")
     @classmethod
     def _validate_list_data(cls, v: Any) -> Tuple[Boolean, ...]:
         """Validate and convert input to a tuple of Boolean elements."""
@@ -157,9 +151,9 @@ class BaseBitlist(SSZModel):
         except Exception as e:
             raise ValueError(f"Cannot convert elements to Boolean: {e}") from e
 
-    def __getitem__(self, key: int | slice) -> Boolean | tuple[Boolean, ...]:
+    def __getitem__(self, key: int | slice) -> Boolean:
         """Get a bit by index or slice."""
-        return self.data[key]
+        return Boolean(self.root[key])
 
     @classmethod
     def is_fixed_size(cls) -> bool:
@@ -194,7 +188,7 @@ class BaseBitlist(SSZModel):
         the last data bit. If the last data bit ends a byte (num_bits % 8 == 0),
         the delimiter is a new byte 0b00000001 appended at the end.
         """
-        num_bits = len(self.data)
+        num_bits = len(self.root)
         if num_bits == 0:
             # Empty list: just the delimiter byte.
             return b"\x01"
@@ -203,7 +197,7 @@ class BaseBitlist(SSZModel):
         byte_array = bytearray(byte_len)
 
         # Pack data bits.
-        for i, bit in enumerate(self.data):
+        for i, bit in enumerate(self.root):
             if bit:
                 byte_array[i // 8] |= 1 << (i % 8)
 
@@ -248,4 +242,4 @@ class BaseBitlist(SSZModel):
             )
 
         bits = [bool((data[i // 8] >> (i % 8)) & 1) for i in range(num_data_bits)]
-        return cls(data=bits)
+        return cls(bits)

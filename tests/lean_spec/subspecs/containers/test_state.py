@@ -90,7 +90,7 @@ def _create_block(
         A signed block wrapper containing the constructed block.
     """
     # Create a block body with the provided votes or an empty list.
-    body = BlockBody(attestations=Attestations(data=votes or []))
+    body = BlockBody(attestations=Attestations(votes or []))
     # Construct the inner block message with correct parent_root linkage.
     block_message = Block(
         slot=Slot(slot),
@@ -190,10 +190,10 @@ def base_state(
         latest_block_header=sample_block_header,
         latest_justified=sample_checkpoint,
         latest_finalized=sample_checkpoint,
-        historical_block_hashes=HistoricalBlockHashes(data=[]),
-        justified_slots=JustifiedSlots(data=[]),
-        justifications_roots=JustificationRoots(data=[]),
-        justifications_validators=JustificationValidators(data=[]),
+        historical_block_hashes=HistoricalBlockHashes([]),
+        justified_slots=JustifiedSlots([]),
+        justifications_roots=JustificationRoots([]),
+        justifications_validators=JustificationValidators([]),
     )
 
 
@@ -237,8 +237,8 @@ def test_get_justifications_single_root(base_state: State) -> None:
     # Bake the synthetic justification data into a derived state.
     state_with_data = base_state.model_copy(
         update={
-            "justifications_roots": JustificationRoots(data=[root1]),
-            "justifications_validators": JustificationValidators(data=votes1),
+            "justifications_roots": JustificationRoots([root1]),
+            "justifications_validators": JustificationValidators(votes1),
         }
     )
 
@@ -281,8 +281,8 @@ def test_get_justifications_multiple_roots(base_state: State) -> None:
     # Create a state that encodes the three roots and the concatenated votes.
     state_with_data = base_state.model_copy(
         update={
-            "justifications_roots": JustificationRoots(data=[root1, root2, root3]),
-            "justifications_validators": JustificationValidators(data=votes1 + votes2 + votes3),
+            "justifications_roots": JustificationRoots([root1, root2, root3]),
+            "justifications_validators": JustificationValidators(votes1 + votes2 + votes3),
         }
     )
 
@@ -318,9 +318,9 @@ def test_with_justifications_empty(
         latest_block_header=sample_block_header,
         latest_justified=sample_checkpoint,
         latest_finalized=sample_checkpoint,
-        historical_block_hashes=HistoricalBlockHashes(data=[]),
-        justified_slots=JustifiedSlots(data=[]),
-        justifications_roots=JustificationRoots(data=[Bytes32(b"\x01" * 32)]),
+        historical_block_hashes=HistoricalBlockHashes([]),
+        justified_slots=JustifiedSlots([]),
+        justifications_roots=JustificationRoots([Bytes32(b"\x01" * 32)]),
         justifications_validators=JustificationValidators(
             data=[Boolean(True)] * sample_config.num_validators.as_int()
         ),
@@ -468,7 +468,7 @@ def test_generate_genesis(sample_config: Config) -> None:
     # Slot should start at 0.
     assert state.slot == Slot(0)
     # Body root must commit to an empty body at genesis.
-    expected_body = BlockBody(attestations=Attestations(data=[]))
+    expected_body = BlockBody(attestations=Attestations([]))
     assert state.latest_block_header.body_root == hash_tree_root(expected_body)
     # History and justifications must be empty initially.
     assert not state.historical_block_hashes
@@ -599,7 +599,7 @@ def test_process_block_header_invalid(
         proposer_index=ValidatorIndex(bad_proposer),
         parent_root=bad_parent_root or parent_root,
         state_root=Bytes32.zero(),
-        body=BlockBody(attestations=Attestations(data=[])),
+        body=BlockBody(attestations=Attestations([])),
     )
 
     # Expect an AssertionError with the given message for each case.

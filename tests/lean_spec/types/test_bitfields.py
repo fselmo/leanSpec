@@ -29,7 +29,7 @@ class TestBitvector:
     def test_instantiate_raw_type_raises_error(self) -> None:
         """Tests that the raw, non-specialized BaseBitvector cannot be instantiated."""
         with pytest.raises(TypeError, match="must define LENGTH"):
-            BaseBitvector(data=[])
+            BaseBitvector([])
 
     def test_instantiation_success(self) -> None:
         """Tests successful instantiation with the correct number of valid boolean items."""
@@ -37,9 +37,9 @@ class TestBitvector:
         class Bitvector4(BaseBitvector):
             LENGTH = 4
 
-        instance = Bitvector4(data=[True, False, 1, 0])
+        instance = Bitvector4([True, False, 1, 0])
         assert len(instance) == 4
-        assert instance == Bitvector4(data=[True, False, True, False])
+        assert instance == Bitvector4([True, False, True, False])
 
     @pytest.mark.parametrize(
         "values",
@@ -55,7 +55,7 @@ class TestBitvector:
             LENGTH = 4
 
         with pytest.raises(ValueError, match="requires exactly 4 bits"):
-            Bitvector4(data=values)
+            Bitvector4(values)
 
     def test_pydantic_validation_accepts_valid_list(self) -> None:
         """Tests that Pydantic validation correctly accepts a valid list of booleans."""
@@ -64,9 +64,9 @@ class TestBitvector:
             LENGTH = 4
 
         model = create_model("Model", value=(Bitvector4, ...))
-        instance: Any = model(value={"data": [True, False, True, False]})
+        instance: Any = model(value=[True, False, True, False])
         assert isinstance(instance.value, Bitvector4)
-        assert instance.value == Bitvector4(data=[True, False, True, False])
+        assert instance.value == Bitvector4([True, False, True, False])
 
     @pytest.mark.parametrize(
         "invalid_value",
@@ -93,7 +93,7 @@ class TestBitvector:
         class Bitvector2(BaseBitvector):
             LENGTH = 2
 
-        vec = Bitvector2(data=[True, False])
+        vec = Bitvector2([True, False])
         with pytest.raises(TypeError):
             vec[0] = False  # type: ignore[index]  # Should fail because SSZModel is immutable
 
@@ -117,7 +117,7 @@ class TestBitlist:
     def test_instantiate_raw_type_raises_error(self) -> None:
         """Tests that the raw, non-specialized BaseBitlist cannot be instantiated."""
         with pytest.raises(TypeError, match="must define LIMIT"):
-            BaseBitlist(data=[])
+            BaseBitlist([])
 
     def test_instantiation_success(self) -> None:
         """Tests successful instantiation with a valid number of items."""
@@ -125,9 +125,9 @@ class TestBitlist:
         class Bitlist8(BaseBitlist):
             LIMIT = 8
 
-        instance = Bitlist8(data=[True, False, 1, 0])
+        instance = Bitlist8([True, False, 1, 0])
         assert len(instance) == 4
-        expected = Bitlist8(data=[True, False, True, False])
+        expected = Bitlist8([True, False, True, False])
         assert instance == expected
 
     def test_instantiation_over_limit_raises_error(self) -> None:
@@ -137,7 +137,7 @@ class TestBitlist:
             LIMIT = 4
 
         with pytest.raises(ValueError, match="cannot contain more than 4 bits"):
-            Bitlist4(data=[True, False, True, False, True])
+            Bitlist4([True, False, True, False, True])
 
     def test_pydantic_validation_accepts_valid_list(self) -> None:
         """Tests that Pydantic validation correctly accepts a valid list of booleans."""
@@ -146,7 +146,7 @@ class TestBitlist:
             LIMIT = 8
 
         model = create_model("Model", value=(Bitlist8, ...))
-        instance: Any = model(value={"data": [True, False, True, False]})
+        instance: Any = model(value=[True, False, True, False])
         assert isinstance(instance.value, Bitlist8)
         assert len(instance.value) == 4
 
@@ -187,7 +187,7 @@ class TestBitfieldSerialization:
         class TestBitvector(BaseBitvector):
             LENGTH = length
 
-        instance = TestBitvector(data=value)
+        instance = TestBitvector(value)
 
         # Test serialization
         encoded = instance.encode_bytes()
@@ -215,7 +215,7 @@ class TestBitfieldSerialization:
         class TestBitlist(BaseBitlist):
             LIMIT = limit
 
-        instance = TestBitlist(data=value)
+        instance = TestBitlist(value)
 
         # Test serialization
         encoded = instance.encode_bytes()
@@ -304,7 +304,7 @@ class TestBitfieldSSZ:
         class TestBitvector(BaseBitvector):
             LENGTH = length
 
-        instance = TestBitvector(data=value)
+        instance = TestBitvector(value)
         encoded = instance.encode_bytes()
         assert encoded.hex() == expected_hex
 
@@ -339,7 +339,7 @@ class TestBitfieldSSZ:
         class TestBitlist(BaseBitlist):
             LIMIT = limit
 
-        instance = TestBitlist(data=value)
+        instance = TestBitlist(value)
         encoded = instance.encode_bytes()
         assert encoded.hex() == expected_hex
 

@@ -4,8 +4,10 @@ from __future__ import annotations
 
 import io
 from abc import ABC, abstractmethod
-from typing import IO, Any
+from typing import IO, Any, TypeVar
 
+from pydantic import GetCoreSchemaHandler, RootModel
+from pydantic_core import core_schema
 from typing_extensions import Iterator, Self
 
 from .base import StrictBaseModel
@@ -97,55 +99,93 @@ class SSZType(ABC):
         with io.BytesIO(data) as stream:
             return cls.deserialize(stream, len(data))
 
+    @classmethod
+    def __get_pydantic_core_schema__(
+        cls,
+        source_type: Any,
+        handler: GetCoreSchemaHandler,
+    ) -> core_schema.CoreSchema:
+        """
+        Provide Pydantic core schema for SSZType instances.
+
+        This tells Pydantic to accept any instance of SSZType without trying to
+        decompose or validate the internal structure.
+        """
+        return core_schema.is_instance_schema(cls)
+
+
+T = TypeVar("T")
+
+
+class SSZRootModel(RootModel[T], SSZType):
+    """
+    Base class for SSZ collection types that wrap a single root value.
+
+    This class is for homogeneous collections like lists, vectors, and bitfields
+    that fundamentally contain a single data structure (tuple, list, etc).
+
+    Provides natural collection APIs by delegating to the root value:
+    - `for item in collection` iterates over root contents
+    - `collection[i]` accesses root by index
+    - `len(collection)` returns root length
+
+    Use SSZModel for container types with named fields.
+    """
+
+    root: Any
+
+    def __len__(self) -> int:
+        """Return the length of the root collection."""
+        return len(self.root)
+
+    def __iter__(self) -> Iterator[Any]:  # type: ignore[override]
+        """Iterate over the root collection's items."""
+        return iter(self.root)
+
+    def __getitem__(self, key: Any) -> Any:
+        """Get an item from the root collection."""
+        return self.root[key]
+
+    def __repr__(self) -> str:
+        """String representation showing the class name and root data."""
+        # For tuples/lists, show the contents directly
+        if isinstance(self.root, (tuple, list)):
+            return f"{self.__class__.__name__}(data={list(self.root)!r})"
+        # For other types, show the root value
+        return f"{self.__class__.__name__}(root={self.root!r})"
+
 
 class SSZModel(StrictBaseModel, SSZType):
     """
-    Base class for SSZ types that use Pydantic validation.
+    Base class for SSZ container types with named fields.
 
     This combines StrictBaseModel (Pydantic validation + immutability) with SSZ serialization.
-    Use this for containers and complex types that can benefit from Pydantic.
+    Use this for containers with heterogeneous named fields.
 
+    For collection types (lists, vectors, bitfields), use SSZRootModel.
     For simple types that need special inheritance (like int), use SSZType directly.
 
-    SSZModel provides natural iteration and indexing for collections with a 'data' field:
-    - `for item in collection` instead of `for item in collection.data`
-    - `collection[i]` instead of `collection.data[i]`
-    - `len(collection)` instead of `len(collection.data)`
+    SSZModel provides field-based access patterns:
+    - `len(container)` returns the number of fields
+    - `for name, value in container` iterates over (field_name, field_value) pairs
+    - `container["field_name"]` accesses fields by name
     """
 
     def __len__(self) -> int:
-        """Return the length of the collection's data or number of container fields."""
-        if hasattr(self, "data"):
-            return len(self.data)
-        # For containers, return number of fields
+        """Return the number of fields in this container."""
         return len(self.model_fields)
 
     def __iter__(self) -> Iterator[Any]:  # type: ignore[override]
-        """
-        Iterate over the collection's data if it's a collection type,
-        otherwise iterate over container field (name, value) pairs.
-
-        For SSZ collections with 'data' field, this iterates over the data contents.
-        For container types, this iterates over (field_name, field_value) pairs.
-        """
-        if hasattr(self, "data"):
-            return iter(self.data)
-        # For containers, iterate over (field_name, field_value) pairs
+        """Iterate over (field_name, field_value) pairs."""
         return iter((name, getattr(self, name)) for name in self.model_fields.keys())
 
     def __getitem__(self, key: Any) -> Any:
-        """Get an item from the collection's data or container field by name."""
-        if hasattr(self, "data"):
-            return self.data[key]
-        # For containers, allow field access by name
+        """Get a field value by name."""
         if isinstance(key, str) and key in self.model_fields:
             return getattr(self, key)
-        raise KeyError(f"Invalid key '{key}' for {self.__class__.__name__}")
+        raise KeyError(f"Field '{key}' not found in {self.__class__.__name__}")
 
     def __repr__(self) -> str:
-        """String representation showing the class name and data."""
-        if hasattr(self, "data"):
-            return f"{self.__class__.__name__}(data={list(self.data)!r})"
-        # For containers, show field names and values
+        """String representation showing field names and values."""
         field_strs = [f"{name}={getattr(self, name)!r}" for name in self.model_fields.keys()]
         return f"{self.__class__.__name__}({' '.join(field_strs)})"

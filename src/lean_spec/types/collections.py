@@ -12,16 +12,16 @@ from typing import (
     cast,
 )
 
-from pydantic import Field, field_validator
+from pydantic import field_validator
 from typing_extensions import Self
 
 from lean_spec.types.constants import OFFSET_BYTE_LENGTH
 
-from .ssz_base import SSZModel, SSZType
+from .ssz_base import SSZRootModel, SSZType
 from .uint import Uint32
 
 
-class SSZVector(SSZModel):
+class SSZVector(SSZRootModel[Tuple[SSZType, ...]]):
     """
     Base class for SSZ Vector types: fixed-length, immutable sequences.
 
@@ -41,12 +41,9 @@ class SSZVector(SSZModel):
     LENGTH: ClassVar[int]
     """The exact number of elements in the vector."""
 
-    data: Tuple[SSZType, ...] = Field(default_factory=tuple)
-    """The immutable data stored in the vector."""
-
-    @field_validator("data", mode="before")
+    @field_validator("root", mode="before")
     @classmethod
-    def _validate_vector_data(cls, v: Any) -> Tuple[SSZType, ...]:
+    def _validate_vector_root(cls, v: Any) -> Tuple[SSZType, ...]:
         """Validate and convert input data to typed tuple."""
         if not hasattr(cls, "ELEMENT_TYPE") or not hasattr(cls, "LENGTH"):
             raise TypeError(f"{cls.__name__} must define ELEMENT_TYPE and LENGTH")
@@ -84,7 +81,7 @@ class SSZVector(SSZModel):
         """Serialize the vector to a binary stream."""
         # If elements are fixed-size, serialize them back-to-back.
         if self.is_fixed_size():
-            return sum(element.serialize(stream) for element in self.data)
+            return sum(element.serialize(stream) for element in self.root)
         # If elements are variable-size, serialize their offsets, then their data.
         else:
             # Use a temporary in-memory stream to hold the serialized variable data.
@@ -92,7 +89,7 @@ class SSZVector(SSZModel):
             # The first offset points to the end of all the offset data.
             offset = self.LENGTH * OFFSET_BYTE_LENGTH
             # Write the offsets to the main stream and the data to the temporary stream.
-            for element in self.data:
+            for element in self.root:
                 Uint32(offset).serialize(stream)
                 offset += element.serialize(variable_data_stream)
             # Write the serialized variable data after the offsets.
@@ -115,7 +112,7 @@ class SSZVector(SSZModel):
             elements = [
                 cls.ELEMENT_TYPE.deserialize(stream, elem_byte_length) for _ in range(cls.LENGTH)
             ]
-            return cls(data=elements)
+            return cls(elements)
         # If elements are variable-size, read offsets to determine element boundaries.
         else:
             # The first offset tells us where the data starts, which must be after all offsets.
@@ -133,7 +130,7 @@ class SSZVector(SSZModel):
                 if start > end:
                     raise ValueError(f"Invalid offsets: start {start} > end {end}")
                 elements.append(cls.ELEMENT_TYPE.deserialize(stream, end - start))
-            return cls(data=elements)
+            return cls(elements)
 
     def encode_bytes(self) -> bytes:
         """Serializes the SSZVector to a byte string."""
@@ -148,7 +145,7 @@ class SSZVector(SSZModel):
             return cls.deserialize(stream, len(data))
 
 
-class SSZList(SSZModel):
+class SSZList(SSZRootModel[Tuple[SSZType, ...]]):
     """
     Base class for SSZ List types - variable-length homogeneous collections.
 
@@ -164,7 +161,7 @@ class SSZList(SSZModel):
             ELEMENT_TYPE = Uint64
             LIMIT = 32
 
-        my_list = Uint64List32(data=[1, 2, 3])
+        my_list = Uint64List32([1, 2, 3])
     """
 
     ELEMENT_TYPE: ClassVar[Type[SSZType]]
@@ -173,12 +170,9 @@ class SSZList(SSZModel):
     LIMIT: ClassVar[int]
     """Maximum number of elements this list can contain."""
 
-    data: Tuple[SSZType, ...] = Field(default_factory=tuple)
-    """The elements in this list, stored as an immutable tuple."""
-
-    @field_validator("data", mode="before")
+    @field_validator("root", mode="before")
     @classmethod
-    def _validate_list_data(cls, v: Any) -> Tuple[SSZType, ...]:
+    def _validate_list_root(cls, v: Any) -> Tuple[SSZType, ...]:
         """Validate and convert input to a tuple of SSZType elements."""
         if not hasattr(cls, "ELEMENT_TYPE") or not hasattr(cls, "LIMIT"):
             raise TypeError(f"{cls.__name__} must define ELEMENT_TYPE and LIMIT")
@@ -227,14 +221,14 @@ class SSZList(SSZModel):
         # Lists are always variable-size, so we serialize offsets + data
         if self.ELEMENT_TYPE.is_fixed_size():
             # Fixed-size elements: serialize them back-to-back
-            return sum(element.serialize(stream) for element in self.data)
+            return sum(element.serialize(stream) for element in self.root)
         else:
             # Variable-size elements: serialize offsets, then data
             variable_data_stream = io.BytesIO()
             # The first offset points to the end of all the offset data
-            offset = len(self.data) * OFFSET_BYTE_LENGTH
+            offset = len(self.root) * OFFSET_BYTE_LENGTH
             # Write the offsets to the main stream and the data to the temporary stream
-            for element in self.data:
+            for element in self.root:
                 Uint32(offset).serialize(stream)
                 offset += element.serialize(variable_data_stream)
             # Write the serialized variable data after the offsets
@@ -259,12 +253,12 @@ class SSZList(SSZModel):
                 cls.ELEMENT_TYPE.deserialize(stream, element_size) for _ in range(num_elements)
             ]
 
-            return cls(data=elements)
+            return cls(elements)
         else:
             # Variable-size elements: read offsets first, then data
             if scope == 0:
                 # Empty list case
-                return cls(data=[])
+                return cls([])
             if scope < OFFSET_BYTE_LENGTH:
                 raise ValueError(f"Invalid scope for variable-size list: {scope}")
 
@@ -291,7 +285,7 @@ class SSZList(SSZModel):
                     raise ValueError(f"Invalid offsets: start {start} > end {end}")
                 elements.append(cls.ELEMENT_TYPE.deserialize(stream, end - start))
 
-            return cls(data=elements)
+            return cls(elements)
 
     def encode_bytes(self) -> bytes:
         """Return the list's canonical SSZ byte representation."""

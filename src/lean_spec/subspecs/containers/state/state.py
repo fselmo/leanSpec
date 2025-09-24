@@ -91,7 +91,7 @@ class State(Container):
             proposer_index=ValidatorIndex(0),
             parent_root=Bytes32.zero(),
             state_root=Bytes32.zero(),
-            body_root=hash_tree_root(BlockBody(attestations=Attestations(data=[]))),
+            body_root=hash_tree_root(BlockBody(attestations=Attestations([]))),
         )
 
         # Assemble and return the full genesis state.
@@ -101,10 +101,10 @@ class State(Container):
             latest_block_header=genesis_header,
             latest_justified=Checkpoint(root=Bytes32.zero(), slot=Slot(0)),
             latest_finalized=Checkpoint(root=Bytes32.zero(), slot=Slot(0)),
-            historical_block_hashes=HistoricalBlockHashes(data=[]),
-            justified_slots=JustifiedSlots(data=[]),
-            justifications_roots=JustificationRoots(data=[]),
-            justifications_validators=JustificationValidators(data=[]),
+            historical_block_hashes=HistoricalBlockHashes([]),
+            justified_slots=JustifiedSlots([]),
+            justifications_roots=JustificationRoots([]),
+            justifications_validators=JustificationValidators([]),
         )
 
     def is_proposer(self, validator_index: ValidatorIndex) -> bool:
@@ -201,8 +201,8 @@ class State(Container):
             votes_list.extend(votes)
 
         # Create immutable SSZList instances
-        new_roots = JustificationRoots(data=roots_list)
-        flat_votes = JustificationValidators(data=votes_list)
+        new_roots = JustificationRoots(roots_list)
+        flat_votes = JustificationValidators(votes_list)
 
         # Return a new state object with the updated fields.
         return self.model_copy(
@@ -362,9 +362,9 @@ class State(Container):
         # Record updated history arrays, ensuring they are cast back to the
         # correct domain-specific type.
         updates["historical_block_hashes"] = self.historical_block_hashes.__class__(
-            data=new_historical_hashes
+            new_historical_hashes
         )
-        updates["justified_slots"] = self.justified_slots.__class__(data=new_justified_slots)
+        updates["justified_slots"] = self.justified_slots.__class__(new_justified_slots)
 
         # Construct the new latest block header.
         #
@@ -478,7 +478,7 @@ class State(Container):
         # Return the updated state.
         return self.model_copy(
             update={
-                "justified_slots": self.justified_slots.__class__(data=justified_slots),
+                "justified_slots": self.justified_slots.__class__(justified_slots),
                 "latest_justified": latest_justified,
                 "latest_finalized": latest_finalized,
             }

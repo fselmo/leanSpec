@@ -34,7 +34,7 @@ class MockState(State):
             proposer_index=ValidatorIndex(0),
             parent_root=Bytes32.zero(),
             state_root=Bytes32.zero(),
-            body_root=hash_tree_root(BlockBody(attestations=Attestations(data=[]))),
+            body_root=hash_tree_root(BlockBody(attestations=Attestations([]))),
         )
 
         super().__init__(
@@ -43,10 +43,10 @@ class MockState(State):
             latest_block_header=genesis_header,
             latest_justified=latest_justified,
             latest_finalized=Checkpoint(root=Bytes32.zero(), slot=Slot(0)),
-            historical_block_hashes=HistoricalBlockHashes(data=[]),
-            justified_slots=JustifiedSlots(data=[]),
-            justifications_roots=JustificationRoots(data=[]),
-            justifications_validators=JustificationValidators(data=[]),
+            historical_block_hashes=HistoricalBlockHashes([]),
+            justified_slots=JustifiedSlots([]),
+            justifications_roots=JustificationRoots([]),
+            justifications_validators=JustificationValidators([]),
         )
 
 

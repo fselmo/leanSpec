@@ -11,12 +11,12 @@ from __future__ import annotations
 
 from typing import IO, Any, ClassVar, Iterable, SupportsIndex
 
-from pydantic import Field, field_validator
+from pydantic import field_validator
 from pydantic.annotated_handlers import GetCoreSchemaHandler
 from pydantic_core import core_schema
 from typing_extensions import Self
 
-from .ssz_base import SSZModel, SSZType
+from .ssz_base import SSZRootModel, SSZType
 
 
 def _coerce_to_bytes(value: Any) -> bytes:
@@ -223,7 +223,7 @@ class Bytes96(BaseBytes):
     LENGTH = 96
 
 
-class BaseByteList(SSZModel):
+class BaseByteList(SSZRootModel[bytes]):
     """
     Base class for specialized `ByteList[L]`.
 
@@ -233,13 +233,12 @@ class BaseByteList(SSZModel):
     Instances are immutable byte blobs whose length can vary up to `LIMIT`.
     """
 
+    root: bytes | str | list[int]
+
     LIMIT: ClassVar[int]
     """Maximum number of bytes the instance may contain."""
 
-    data: bytes = Field(default=b"")
-    """The raw bytes stored in this list."""
-
-    @field_validator("data", mode="before")
+    @field_validator("root", mode="before")
     @classmethod
     def _validate_byte_list_data(cls, v: Any) -> bytes:
         """Validate and convert input to bytes with limit checking."""
@@ -268,8 +267,11 @@ class BaseByteList(SSZModel):
         Returns:
             Number of bytes written (the length of this instance).
         """
-        stream.write(self.data)
-        return len(self.data)
+        if not isinstance(self.root, bytes):
+            raise TypeError(f"{self.__class__.__name__} root must be a byte array")
+
+        stream.write(self.root)
+        return len(self.root)
 
     @classmethod
     def deserialize(cls, stream: IO[bytes], scope: int) -> Self:
@@ -290,11 +292,13 @@ class BaseByteList(SSZModel):
         data = stream.read(scope)
         if len(data) != scope:
             raise IOError("Stream ended prematurely while decoding ByteList")
-        return cls(data=data)
+        return cls(data)
 
     def encode_bytes(self) -> bytes:
         """Return the value's canonical SSZ byte representation."""
-        return self.data
+        if not isinstance(self.root, bytes):
+            raise TypeError(f"{self.__class__.__name__} root must be a byte array")
+        return self.root
 
     @classmethod
     def decode_bytes(cls, data: bytes) -> Self:
@@ -305,36 +309,46 @@ class BaseByteList(SSZModel):
         """
         if len(data) > cls.LIMIT:
             raise ValueError(f"ByteList[{cls.LIMIT}] length {len(data)} exceeds limit")
-        return cls(data=data)
+        return cls(bytes(data))
 
     def __bytes__(self) -> bytes:
         """Return the byte list as a bytes object."""
-        return self.data
+        if not isinstance(self.root, bytes):
+            raise TypeError(f"{self.__class__.__name__} root must be a byte array")
+        return self.root
 
     def __add__(self, other: Any) -> bytes:
         """Return the concatenation of the byte list and the argument."""
-        return self.data + bytes(other)
+        if not isinstance(self.root, bytes):
+            raise TypeError(f"{self.__class__.__name__} root must be a byte array")
+        return self.root + bytes(other)
 
     def __radd__(self, other: Any) -> bytes:
         """Return the concatenation of the argument and the byte list."""
-        return bytes(other) + self.data
+        if not isinstance(self.root, bytes):
+            raise TypeError(f"{self.__class__.__name__} root must be a byte array")
+        return bytes(other) + self.root
 
     def __repr__(self) -> str:
         """Return a string representation of the byte list."""
         tname = type(self).__name__
-        return f"{tname}({self.data.hex()})"
+        if not isinstance(self.root, bytes):
+            raise TypeError(f"{self.__class__.__name__} root must be a byte array")
+        return f"{tname}({self.root.hex()})"
 
     def __eq__(self, other: object) -> bool:
         """Return whether the two byte lists are equal."""
-        return isinstance(other, type(self)) and self.data == other.data
+        return isinstance(other, type(self)) and self.root == other.root
 
     def __hash__(self) -> int:
         """Return the hash of the byte list."""
-        return hash((type(self), self.data))
+        return hash((type(self), self.root))
 
     def hex(self) -> str:
         """Return the hexadecimal string representation of the underlying bytes."""
-        return self.data.hex()
+        if not isinstance(self.root, bytes):
+            raise TypeError(f"{self.__class__.__name__} root must be a byte array")
+        return self.root.hex()
 
 
 # Common ByteList types with explicit classes

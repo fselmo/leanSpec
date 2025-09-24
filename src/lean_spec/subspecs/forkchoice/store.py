@@ -411,7 +411,7 @@ class Store(Container):
                 proposer_index=validator_index,
                 parent_root=head_root,
                 state_root=Bytes32.zero(),  # Temporary; updated after state computation
-                body=BlockBody(attestations=Attestations(data=attestations)),
+                body=BlockBody(attestations=Attestations(attestations)),
             )
 
             # Apply state transition to get the post-block state
@@ -454,7 +454,7 @@ class Store(Container):
             proposer_index=validator_index,
             parent_root=head_root,
             state_root=Bytes32.zero(),  # Will be updated with computed hash
-            body=BlockBody(attestations=Attestations(data=attestations)),
+            body=BlockBody(attestations=Attestations(attestations)),
         )
 
         # Apply state transition to get final post-state and compute state root

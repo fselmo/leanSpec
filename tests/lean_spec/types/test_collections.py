@@ -200,13 +200,13 @@ class TestSSZVector:
 
     def test_instantiate_raw_type_raises_error(self) -> None:
         """Tests that the raw, non-specialized SSZVector cannot be instantiated."""
-        with pytest.raises(TypeError, match="BaseModel.__init__\\(\\) takes 1 positional argument"):
-            SSZVector([])  # type: ignore[misc]
+        with pytest.raises(TypeError, match="must define ELEMENT_TYPE and LENGTH"):
+            SSZVector([])
 
     def test_instantiation_success(self) -> None:
         """Tests successful instantiation with the correct number of valid items."""
         vec_type = Uint8Vector4
-        instance = vec_type(data=[1, 2, 3, 4])
+        instance = vec_type([1, 2, 3, 4])
         assert len(instance) == 4
         assert list(instance) == [Uint8(1), Uint8(2), Uint8(3), Uint8(4)]
 
@@ -214,28 +214,28 @@ class TestSSZVector:
         """Tests that providing the wrong number of items during instantiation fails."""
         vec_type = Uint8Vector4
         with pytest.raises(ValueError, match="requires exactly 4 items"):
-            vec_type(data=[1, 2, 3])  # Too few
+            vec_type([1, 2, 3])  # Too few
         with pytest.raises(ValueError, match="requires exactly 4 items"):
-            vec_type(data=[1, 2, 3, 4, 5])  # Too many
+            vec_type([1, 2, 3, 4, 5])  # Too many
 
     def test_pydantic_validation(self) -> None:
         """Tests that Pydantic validation works for SSZVector types."""
         model = create_model("Model", value=(Uint8Vector2, ...))
         # Test valid data
-        instance: Any = model(value={"data": [10, 20]})
+        instance: Any = model(value=[10, 20])
         assert isinstance(instance.value, Uint8Vector2)
         assert list(instance.value) == [Uint8(10), Uint8(20)]
         # Test invalid data
         with pytest.raises(ValidationError):
-            model(value={"data": [10]})  # Too short
+            model(value=[10])  # Too short
         with pytest.raises(ValidationError):
-            model(value={"data": [10, 20, 30]})  # Too long
+            model(value=[10, 20, 30])  # Too long
         with pytest.raises(TypeError):
-            model(value={"data": [10, "bad"]})  # Wrong element type
+            model(value=[10, "bad"])  # Wrong element type
 
     def test_vector_is_immutable(self) -> None:
         """Tests that attempting to change an item in an SSZVector raises a TypeError."""
-        vec = Uint8Vector2(data=[1, 2])
+        vec = Uint8Vector2([1, 2])
         with pytest.raises(TypeError):
             vec[0] = 3  # type: ignore[index]  # Should fail because SSZModel is immutable
 
@@ -256,36 +256,36 @@ class TestList:
     def test_instantiate_raw_type_raises_error(self) -> None:
         """Tests that the raw, non-specialized SSZList cannot be instantiated."""
         with pytest.raises(TypeError, match="must define ELEMENT_TYPE and LIMIT"):
-            SSZList(data=[])
+            SSZList([])
 
     def test_instantiation_over_limit_raises_error(self) -> None:
         """Tests that providing more items than the limit during instantiation fails."""
         list_type = Uint8List4
         with pytest.raises(ValueError, match="cannot contain more than 4 elements"):
-            list_type(data=[1, 2, 3, 4, 5])
+            list_type([1, 2, 3, 4, 5])
 
     def test_pydantic_validation(self) -> None:
         """Tests that Pydantic validation works for List types."""
         model = create_model("Model", value=(Uint8List4, ...))
         # Test valid data
-        instance: Any = model(value=Uint8List4(data=[10, 20]))
+        instance: Any = model(value=Uint8List4([10, 20]))
         assert isinstance(instance.value, Uint8List4)
         assert list(instance.value) == [Uint8(10), Uint8(20)]
         # Test invalid data
         with pytest.raises(ValidationError):
-            model(value=Uint8List4(data=[10, 20, 30, 40, 50]))  # Too long
+            model(value=Uint8List4([10, 20, 30, 40, 50]))  # Too long
         with pytest.raises(ValidationError):
-            model(value=Uint8List4(data=[10, "bad"]))  # Wrong element type
+            model(value=Uint8List4([10, "bad"]))  # Wrong element type
 
     def test_append_at_limit_raises_error(self) -> None:
         """Tests that creating a list at limit +1 fails during construction."""
         with pytest.raises(ValueError, match="cannot contain more than 4 elements"):
-            BooleanList4(data=[True] * 5)
+            BooleanList4([True] * 5)
 
     def test_extend_over_limit_raises_error(self) -> None:
         """Tests that creating a list over the limit fails during construction."""
         with pytest.raises(ValueError, match="cannot contain more than 4 elements"):
-            BooleanList4(data=[True, False, True, False, True])
+            BooleanList4([True, False, True, False, True])
 
 
 class TestSSZVectorSerialization:
@@ -320,7 +320,7 @@ class TestSSZVectorSerialization:
         self, vector_type: Type[SSZVector], value: Tuple[Any, ...], expected_hex: str
     ) -> None:
         """Tests the serialization of vectors with fixed-size elements."""
-        instance = vector_type(data=value)
+        instance = vector_type(value)
         encoded = instance.encode_bytes()
         assert encoded.hex() == expected_hex
         decoded = vector_type.decode_bytes(encoded)
@@ -332,17 +332,17 @@ class TestSSZVectorSerialization:
 
         # The inner list (`b`) now serializes to a packed representation, changing the total size
         val1 = VariableContainer(
-            a=Uint8(1), b=list_type(data=[Uint16(10), Uint16(20)])
+            a=Uint8(1), b=list_type([Uint16(10), Uint16(20)])
         )  # Serialized size: 1 + 4 + (2*2) = 9 bytes
         val2 = VariableContainer(
-            a=Uint8(2), b=list_type(data=[Uint16(30)])
+            a=Uint8(2), b=list_type([Uint16(30)])
         )  # Serialized size: 1 + 4 + (1*2) = 7 bytes
-        instance = VariableContainerVector2(data=[val1, val2])
+        instance = VariableContainerVector2([val1, val2])
 
         expected_hex = (
             "0800000011000000"  # Offsets: val1 starts at 8, val2 starts at 17 (8+9)
-            "01050000000a001400"  # val1 data: a=1, offset=5, b_data=[10,20]
-            "02050000001e00"  # val2 data: a=2, offset=5, b_data=[30]
+            "01050000000a001400"  # val1 data: a=1, offset=5, b_[10,20]
+            "02050000001e00"  # val2 data: a=2, offset=5, b_[30]
         )
 
         encoded = instance.encode_bytes()
@@ -382,7 +382,7 @@ class TestListSerialization:
         self, list_type: Type[SSZList], value: Tuple[Any, ...], expected_hex: str
     ) -> None:
         """Tests the serialization of lists with fixed-size elements."""
-        instance = list_type(data=value)
+        instance = list_type(value)
         encoded = instance.encode_bytes()
         assert encoded.hex() == expected_hex
         decoded = list_type.decode_bytes(encoded)
@@ -394,12 +394,12 @@ class TestListSerialization:
         element_list_type = Uint16List4
 
         val1 = VariableContainer(
-            a=Uint8(1), b=element_list_type(data=[Uint16(10)])
+            a=Uint8(1), b=element_list_type([Uint16(10)])
         )  # Serialized size: 1 + 4 + 2 = 7 bytes
         val2 = VariableContainer(
-            a=Uint8(2), b=element_list_type(data=[Uint16(30), Uint16(40)])
+            a=Uint8(2), b=element_list_type([Uint16(30), Uint16(40)])
         )  # Serialized size: 1 + 4 + 4 = 9 bytes
-        instance = list_type(data=[val1, val2])
+        instance = list_type([val1, val2])
 
         expected_hex = (
             "080000000f000000"  # Offsets: val1 starts at 8, val2 starts at 15 (8+7)

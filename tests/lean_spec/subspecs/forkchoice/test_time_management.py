@@ -267,7 +267,7 @@ class TestProposalHeadTiming:
             proposer_index=Uint64(0),
             parent_root=Bytes32.zero(),
             state_root=Bytes32(b"genesis" + b"\x00" * 25),
-            body=BlockBody(attestations=Attestations(data=[])),
+            body=BlockBody(attestations=Attestations([])),
         )
         genesis_hash = hash_tree_root(genesis_block)
         sample_store.blocks[genesis_hash] = genesis_block

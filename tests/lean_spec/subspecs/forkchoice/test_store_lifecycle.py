@@ -71,7 +71,7 @@ class TestStoreCreation:
             proposer_index=Uint64(1),
             parent_root=Bytes32.zero(),
             state_root=Bytes32(b"state" + b"\x00" * 27),
-            body=BlockBody(attestations=Attestations(data=[])),
+            body=BlockBody(attestations=Attestations([])),
         )
         block_hash = hash_tree_root(block)
 
@@ -119,10 +119,10 @@ class TestStoreCreation:
             latest_block_header=block_header,
             latest_justified=checkpoint,
             latest_finalized=checkpoint,
-            historical_block_hashes=HistoricalBlockHashes(data=[]),
-            justified_slots=JustifiedSlots(data=[]),
-            justifications_roots=JustificationRoots(data=[]),
-            justifications_validators=JustificationValidators(data=[]),
+            historical_block_hashes=HistoricalBlockHashes([]),
+            justified_slots=JustifiedSlots([]),
+            justifications_roots=JustificationRoots([]),
+            justifications_validators=JustificationValidators([]),
         )
 
         # Create anchor block
@@ -131,7 +131,7 @@ class TestStoreCreation:
             proposer_index=Uint64(0),
             parent_root=Bytes32.zero(),
             state_root=hash_tree_root(state),  # Must match state
-            body=BlockBody(attestations=Attestations(data=[])),
+            body=BlockBody(attestations=Attestations([])),
         )
 
         # Create store using factory method

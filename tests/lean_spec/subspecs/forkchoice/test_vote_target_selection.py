@@ -32,7 +32,7 @@ class TestVoteTargetCalculation:
             proposer_index=Uint64(0),
             parent_root=Bytes32.zero(),
             state_root=Bytes32(b"genesis" + b"\x00" * 25),
-            body=BlockBody(attestations=Attestations(data=[])),
+            body=BlockBody(attestations=Attestations([])),
         )
         genesis_hash = hash_tree_root(genesis)
 
@@ -41,7 +41,7 @@ class TestVoteTargetCalculation:
             proposer_index=Uint64(1),
             parent_root=genesis_hash,
             state_root=Bytes32(b"block1" + b"\x00" * 26),
-            body=BlockBody(attestations=Attestations(data=[])),
+            body=BlockBody(attestations=Attestations([])),
         )
         block_1_hash = hash_tree_root(block_1)
 
@@ -84,7 +84,7 @@ class TestVoteTargetCalculation:
                 proposer_index=Uint64(i),
                 parent_root=prev_hash,
                 state_root=Bytes32(f"block{i}".encode() + b"\x00" * (32 - len(f"block{i}"))),
-                body=BlockBody(attestations=Attestations(data=[])),
+                body=BlockBody(attestations=Attestations([])),
             )
             block_hash = hash_tree_root(block)
             blocks[block_hash] = block
@@ -125,7 +125,7 @@ class TestVoteTargetCalculation:
             proposer_index=Uint64(0),
             parent_root=Bytes32.zero(),
             state_root=Bytes32(b"genesis" + b"\x00" * 25),
-            body=BlockBody(attestations=Attestations(data=[])),
+            body=BlockBody(attestations=Attestations([])),
         )
         genesis_hash = hash_tree_root(genesis)
 
@@ -134,7 +134,7 @@ class TestVoteTargetCalculation:
             proposer_index=Uint64(1),
             parent_root=genesis_hash,
             state_root=Bytes32(b"block1" + b"\x00" * 26),
-            body=BlockBody(attestations=Attestations(data=[])),
+            body=BlockBody(attestations=Attestations([])),
         )
         block_1_hash = hash_tree_root(block_1)
 
@@ -143,7 +143,7 @@ class TestVoteTargetCalculation:
             proposer_index=Uint64(2),
             parent_root=block_1_hash,
             state_root=Bytes32(b"block2" + b"\x00" * 26),
-            body=BlockBody(attestations=Attestations(data=[])),
+            body=BlockBody(attestations=Attestations([])),
         )
         block_2_hash = hash_tree_root(block_2)
 
@@ -186,7 +186,7 @@ class TestVoteTargetCalculation:
                 proposer_index=Uint64(i % 10),
                 parent_root=prev_hash,
                 state_root=Bytes32(f"block{i}".encode() + b"\x00" * (32 - len(f"block{i}"))),
-                body=BlockBody(attestations=Attestations(data=[])),
+                body=BlockBody(attestations=Attestations([])),
             )
             block_hash = hash_tree_root(block)
             blocks[block_hash] = block
@@ -232,7 +232,7 @@ class TestVoteTargetCalculation:
             proposer_index=Uint64(0),
             parent_root=Bytes32.zero(),
             state_root=Bytes32(b"genesis" + b"\x00" * 25),
-            body=BlockBody(attestations=Attestations(data=[])),
+            body=BlockBody(attestations=Attestations([])),
         )
         genesis_hash = hash_tree_root(genesis)
 
@@ -241,7 +241,7 @@ class TestVoteTargetCalculation:
             proposer_index=Uint64(5),
             parent_root=genesis_hash,
             state_root=Bytes32(b"head" + b"\x00" * 28),
-            body=BlockBody(attestations=Attestations(data=[])),
+            body=BlockBody(attestations=Attestations([])),
         )
         head_hash = hash_tree_root(head_block)
 
@@ -282,7 +282,7 @@ class TestSafeTargetComputation:
             proposer_index=Uint64(0),
             parent_root=Bytes32.zero(),
             state_root=Bytes32(b"genesis" + b"\x00" * 25),
-            body=BlockBody(attestations=Attestations(data=[])),
+            body=BlockBody(attestations=Attestations([])),
         )
         genesis_block_hash = hash_tree_root(genesis_block)
 
@@ -313,7 +313,7 @@ class TestSafeTargetComputation:
             proposer_index=Uint64(0),
             parent_root=Bytes32.zero(),
             state_root=Bytes32(b"genesis" + b"\x00" * 25),
-            body=BlockBody(attestations=Attestations(data=[])),
+            body=BlockBody(attestations=Attestations([])),
         )
         genesis_hash = hash_tree_root(genesis)
 
@@ -322,7 +322,7 @@ class TestSafeTargetComputation:
             proposer_index=Uint64(1),
             parent_root=genesis_hash,
             state_root=Bytes32(b"block1" + b"\x00" * 26),
-            body=BlockBody(attestations=Attestations(data=[])),
+            body=BlockBody(attestations=Attestations([])),
         )
         block_1_hash = hash_tree_root(block_1)
 
@@ -388,7 +388,7 @@ class TestEdgeCases:
             proposer_index=Uint64(0),
             parent_root=Bytes32.zero(),
             state_root=Bytes32(b"genesis" + b"\x00" * 25),
-            body=BlockBody(attestations=Attestations(data=[])),
+            body=BlockBody(attestations=Attestations([])),
         )
         genesis_hash = hash_tree_root(genesis)
 
