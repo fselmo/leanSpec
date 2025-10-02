@@ -1,0 +1,1 @@
+"""Vote processing test fixtures."""
