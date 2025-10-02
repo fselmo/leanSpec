@@ -22,13 +22,14 @@ class FixtureCollector:
         """
         self.output_dir = output_dir
         self.fork = fork
-        self.fixtures: List[tuple[str, str, Any]] = []
+        self.fixtures: List[tuple[str, str, Any, str]] = []  # (test_name, format, fixture, nodeid)
 
     def add_fixture(
         self,
         test_name: str,
         fixture_format: str,
         fixture: Any,
+        test_nodeid: str,
     ) -> None:
         """
         Add a fixture to the collection.
@@ -37,30 +38,36 @@ class FixtureCollector:
             test_name: Name of the test that generated this fixture.
             fixture_format: Format name (e.g., "vote_processing_test").
             fixture: The fixture object.
+            test_nodeid: Complete pytest node ID (e.g., "tests/path/test.py::test_name").
         """
-        self.fixtures.append((test_name, fixture_format, fixture))
+        self.fixtures.append((test_name, fixture_format, fixture, test_nodeid))
 
     def write_fixtures(self) -> None:
         """Write all collected fixtures to disk."""
-        for test_name, fixture_format, fixture in self.fixtures:
+        for test_name, fixture_format, fixture, test_nodeid in self.fixtures:
             # Create directory structure: fixtures/fork/format/test_name.json
             format_dir = fixture_format.replace("_test", "")
             fixture_path = self.output_dir / self.fork / format_dir
             fixture_path.mkdir(parents=True, exist_ok=True)
 
-            # Write fixture JSON
+            # Create test ID by appending fork parametrization to nodeid
+            # Example: "tests/path/test.py::test_name[fork_3sf-vote_processing_test]"
+            test_id = f"{test_nodeid}[fork_{self.fork}-{fixture_format}]"
+
+            # Write fixture JSON with test ID as top-level key
             output_file = fixture_path / f"{test_name}.json"
             fixture_dict = fixture.json_dict_with_info()
 
+            # Wrap in test ID key (execution-spec-tests style)
+            wrapped_fixture = {test_id: fixture_dict}
+
             with open(output_file, "w") as f:
                 json.dump(
-                    fixture_dict,
+                    wrapped_fixture,
                     f,
-                    indent=2,
+                    indent=4,  # Use 4 spaces like execution-spec-tests
                     default=CamelModel.json_encoder,
                 )
-
-            print(f"Generated: {output_file.relative_to(self.output_dir)}")
 
 
 def pytest_addoption(parser: pytest.Parser) -> None:

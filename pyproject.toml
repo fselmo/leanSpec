@@ -117,6 +117,8 @@ addopts = [
     "--cov-report=term-missing",
     "--cov-report=html",
     "--cov-branch",
+    # Exclude fixture generation tests from regular test runs
+    "--ignore=tests/consensus_fixtures",
 ]
 markers = ["slow: marks tests as slow (deselect with '-m \"not slow\"')"]
 

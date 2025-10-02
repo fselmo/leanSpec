@@ -48,8 +48,8 @@ def fill(
     Example:
         fill tests/vote_processing --fork=3sf --clean -v
     """
-    # Find pytest-fill.ini configuration
-    config_path = Path(__file__).parent.parent / "pytest-fill.ini"
+    # Look for pytest-fill.ini in current directory (project root)
+    config_path = Path.cwd() / "pytest-fill.ini"
 
     # Build pytest arguments
     args = [

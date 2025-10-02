@@ -60,10 +60,12 @@ def vote_test(
         )
 
         # Add to collector
+        # Use complete nodeid for test identification (execution-spec-tests pattern)
         request.config.fixture_collector.add_fixture(  # type: ignore[attr-defined]
             test_name=request.node.name,
             fixture_format=fixture.format_name,
             fixture=fixture,
+            test_nodeid=request.node.nodeid,
         )
 
     return _create_vote_test
@@ -112,10 +114,12 @@ def block_test(
         )
 
         # Add to collector
+        # Use complete nodeid for test identification (execution-spec-tests pattern)
         request.config.fixture_collector.add_fixture(  # type: ignore[attr-defined]
             test_name=request.node.name,
             fixture_format=fixture.format_name,
             fixture=fixture,
+            test_nodeid=request.node.nodeid,
         )
 
     return _create_block_test
@@ -164,10 +168,12 @@ def chain_test(
         )
 
         # Add to collector
+        # Use complete nodeid for test identification (execution-spec-tests pattern)
         request.config.fixture_collector.add_fixture(  # type: ignore[attr-defined]
             test_name=request.node.name,
             fixture_format=fixture.format_name,
             fixture=fixture,
+            test_nodeid=request.node.nodeid,
         )
 
     return _create_chain_test
