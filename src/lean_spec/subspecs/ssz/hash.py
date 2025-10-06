@@ -97,7 +97,7 @@ def _htr_bitvector_base(value: BaseBitvector) -> Bytes32:
     # Compute limit in chunks: (nbits + 255) // 256
     limit = (type(value).LENGTH + 255) // 256
     # Pack bits and merkleize with the computed limit
-    return Merkle.merkleize(Packer.pack_bits(tuple(bool(b) for b in value.data)), limit=limit)
+    return Merkle.merkleize(Packer.pack_bits(tuple(bool(b) for b in value)), limit=limit)
 
 
 @hash_tree_root.register
@@ -106,8 +106,8 @@ def _htr_bitlist_base(value: BaseBitlist) -> Bytes32:
     limit = (type(value).LIMIT + 255) // 256
     # Pack bits, merkleize, and mix in the length
     return Merkle.mix_in_length(
-        Merkle.merkleize(Packer.pack_bits(tuple(bool(b) for b in value.data)), limit=limit),
-        len(value.data),
+        Merkle.merkleize(Packer.pack_bits(tuple(bool(b) for b in value)), limit=limit),
+        len(value),
     )
 
 

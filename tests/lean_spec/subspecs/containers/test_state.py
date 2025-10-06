@@ -322,7 +322,7 @@ def test_with_justifications_empty(
         justified_slots=JustifiedSlots([]),
         justifications_roots=JustificationRoots([Bytes32(b"\x01" * 32)]),
         justifications_validators=JustificationValidators(
-            data=[Boolean(True)] * sample_config.num_validators.as_int()
+            [Boolean(True)] * sample_config.num_validators.as_int()
         ),
     )
 
