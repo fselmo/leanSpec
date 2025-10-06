@@ -173,11 +173,11 @@ class SSZModel(StrictBaseModel, SSZType):
 
     def __len__(self) -> int:
         """Return the number of fields in this container."""
-        return len(self.model_fields)
+        return len(self.__pydantic_fields__)
 
     def __iter__(self) -> Iterator[Any]:  # type: ignore[override]
         """Iterate over (field_name, field_value) pairs."""
-        return iter((name, getattr(self, name)) for name in self.model_fields.keys())
+        return iter((name, getattr(self, name)) for name in self.__pydantic_fields__.keys())
 
     def __getitem__(self, key: Any) -> Any:
         """Get a field value by name."""
@@ -187,5 +187,5 @@ class SSZModel(StrictBaseModel, SSZType):
 
     def __repr__(self) -> str:
         """String representation showing field names and values."""
-        field_strs = [f"{name}={getattr(self, name)!r}" for name in self.model_fields.keys()]
+        field_strs = [f"{name}={getattr(self, name)!r}" for name in self.__pydantic_fields__.keys()]
         return f"{self.__class__.__name__}({' '.join(field_strs)})"
